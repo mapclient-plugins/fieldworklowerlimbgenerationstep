@@ -103,6 +103,83 @@
            <property name="currentIndex">
             <number>0</number>
            </property>
+           <widget class="QWidget" name="page_2">
+            <attribute name="label">
+             <string>Landmarks</string>
+            </attribute>
+            <layout class="QFormLayout" name="formLayout_3">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>RASIS</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>LASIS</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Sacral</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_9">
+               <property name="text">
+                <string>Lateral Epicondyle</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="label_15">
+               <property name="text">
+                <string>Medial Epicondyle</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_16">
+               <property name="text">
+                <string>Lateral Malleolus</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="label_17">
+               <property name="text">
+                <string>Medial Malleolus</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="comboBox_RASIS"/>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="comboBox_LASIS"/>
+             </item>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="comboBox_sacral"/>
+             </item>
+             <item row="3" column="1">
+              <widget class="QComboBox" name="comboBox_LEC"/>
+             </item>
+             <item row="4" column="1">
+              <widget class="QComboBox" name="comboBox_MEC"/>
+             </item>
+             <item row="5" column="1">
+              <widget class="QComboBox" name="comboBox_LM"/>
+             </item>
+             <item row="6" column="1">
+              <widget class="QComboBox" name="comboBox_MM"/>
+             </item>
+            </layout>
+           </widget>
            <widget class="QWidget" name="page">
             <attribute name="label">
              <string>Manual Registration</string>
@@ -116,116 +193,25 @@
                <item row="1" column="0">
                 <widget class="QLabel" name="label_14">
                  <property name="text">
-                  <string>PC 1:</string>
+                  <string>Shape Modes:</string>
                  </property>
                 </widget>
-               </item>
-               <item row="1" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_6">
-                 <item>
-                  <widget class="QSlider" name="horizontalSlider_pc1">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox_pc1"/>
-                 </item>
-                </layout>
                </item>
                <item row="2" column="0">
-                <widget class="QLabel" name="label_15">
-                 <property name="text">
-                  <string>PC 2:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_7">
-                 <item>
-                  <widget class="QSlider" name="horizontalSlider_pc2">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox_pc2"/>
-                 </item>
-                </layout>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_16">
-                 <property name="text">
-                  <string>PC 3:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_8">
-                 <item>
-                  <widget class="QSlider" name="horizontalSlider_pc3">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox_pc3"/>
-                 </item>
-                </layout>
-               </item>
-               <item row="4" column="0">
-                <widget class="QLabel" name="label_17">
-                 <property name="text">
-                  <string>PC 4:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="0">
                 <widget class="QLabel" name="label_18">
                  <property name="text">
-                  <string>PC 5:</string>
+                  <string>Scaling:</string>
                  </property>
                 </widget>
                </item>
-               <item row="5" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_9">
-                 <item>
-                  <widget class="QSlider" name="horizontalSlider_pc5">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox_pc5"/>
-                 </item>
-                </layout>
-               </item>
-               <item row="4" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_10">
-                 <item>
-                  <widget class="QSlider" name="horizontalSlider_pc4">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox_pc4"/>
-                 </item>
-                </layout>
-               </item>
-               <item row="6" column="0">
+               <item row="3" column="0">
                 <widget class="QLabel" name="label_19">
                  <property name="text">
                   <string>Pelvis Trans.</string>
                  </property>
                 </widget>
                </item>
-               <item row="6" column="1">
+               <item row="3" column="1">
                 <layout class="QHBoxLayout" name="horizontalLayout_11">
                  <item>
                   <widget class="QDoubleSpinBox" name="doubleSpinBox_ptx"/>
@@ -238,14 +224,14 @@
                  </item>
                 </layout>
                </item>
-               <item row="7" column="0">
+               <item row="4" column="0">
                 <widget class="QLabel" name="label_20">
                  <property name="text">
                   <string>Pelvis Rot.</string>
                  </property>
                 </widget>
                </item>
-               <item row="7" column="1">
+               <item row="4" column="1">
                 <layout class="QHBoxLayout" name="horizontalLayout_12">
                  <item>
                   <widget class="QDoubleSpinBox" name="doubleSpinBox_prx"/>
@@ -258,14 +244,14 @@
                  </item>
                 </layout>
                </item>
-               <item row="8" column="0">
+               <item row="5" column="0">
                 <widget class="QLabel" name="label_21">
                  <property name="text">
                   <string>Hip Rot.</string>
                  </property>
                 </widget>
                </item>
-               <item row="8" column="1">
+               <item row="5" column="1">
                 <layout class="QHBoxLayout" name="horizontalLayout_13">
                  <item>
                   <widget class="QDoubleSpinBox" name="doubleSpinBox_hipx"/>
@@ -278,14 +264,14 @@
                  </item>
                 </layout>
                </item>
-               <item row="9" column="0">
+               <item row="6" column="0">
                 <widget class="QLabel" name="label_22">
                  <property name="text">
                   <string>Knee Rot.</string>
                  </property>
                 </widget>
                </item>
-               <item row="9" column="1">
+               <item row="6" column="1">
                 <layout class="QHBoxLayout" name="horizontalLayout_14">
                  <item>
                   <widget class="QDoubleSpinBox" name="doubleSpinBox_kneex"/>
@@ -298,15 +284,64 @@
                  </item>
                 </layout>
                </item>
-               <item row="10" column="0">
-                <widget class="QLabel" name="label">
-                 <property name="text">
-                  <string>Scaling:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="10" column="1">
+               <item row="2" column="1">
                 <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+               </item>
+               <item row="1" column="1">
+                <layout class="QGridLayout" name="gridLayout_3">
+                 <item row="1" column="1">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBox_pc1"/>
+                 </item>
+                 <item row="2" column="3">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBox_pc4"/>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBox_pc3"/>
+                 </item>
+                 <item row="1" column="3">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBox_pc2"/>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label">
+                   <property name="text">
+                    <string>1</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QLabel" name="label_2">
+                   <property name="text">
+                    <string>2</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>3</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="2">
+                  <widget class="QLabel" name="label_4">
+                   <property name="text">
+                    <string>4</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
               </layout>
              </item>
@@ -508,7 +543,7 @@
               <x>0</x>
               <y>0</y>
               <width>332</width>
-              <height>419</height>
+              <height>388</height>
              </rect>
             </property>
             <attribute name="label">

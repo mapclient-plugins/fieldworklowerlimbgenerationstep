@@ -10,6 +10,7 @@ from PySide import QtCore
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclientplugins.fieldworklowerlimbgenerationstep.configuredialog import ConfigureDialog
 
+from mapclientplugins.fieldworklowerlimbgenerationstep import llstep
 
 class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
     '''
@@ -42,6 +43,8 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         self._config['identifier'] = ''
         self._config[''] = ''
 
+        self._data = llstep.LLStepData()
+
 
     def execute(self):
         '''
@@ -59,11 +62,11 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         uses port for this step then the index can be ignored.
         '''
         if index == 0:
-            portData0 = dataIn # http://physiomeproject.org/workflow/1.0/rdf-schema#landmarks
+            self._data.inputLandmarks = dataIn # http://physiomeproject.org/workflow/1.0/rdf-schema#landmarks
         elif index == 1:
-            portData1 = dataIn # ju#principalcomponents
+            self._data.inputPCs = dataIn # ju#principalcomponents
         else:
-            portData2 = dataIn # ju#fieldworkmodeldict
+            self._data.inputModelDict = dataIn # ju#fieldworkmodeldict
 
     def getPortData(self, index):
         '''
@@ -72,11 +75,9 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         provides port for this step then the index can be ignored.
         '''
         if index == 3:
-            portData3 = None # ju#fieldworkmodeldict
-            return portData3
+            return self._data.outputModelDict()
         else:
-            portData4 = None # ju#geometrictransform
-            return portData4
+            return self._data.outputTransform()
 
     def configure(self):
         '''
