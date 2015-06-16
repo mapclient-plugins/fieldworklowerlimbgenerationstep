@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>602</width>
-    <height>427</height>
+    <height>606</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,7 +28,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEdit0"/>
+       <widget class="QLineEdit" name="lineEdit_id"/>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label1">
@@ -36,31 +36,6 @@
          <string>Registration Mode:</string>
         </property>
        </widget>
-      </item>
-      <item row="1" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QRadioButton" name="radioButton_2">
-          <property name="text">
-           <string>Shape Model</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="radioButton_3">
-          <property name="text">
-           <string>Uniform Scaling</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="radioButton">
-          <property name="text">
-           <string>Per Bone Scaling</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label">
@@ -70,7 +45,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QSpinBox" name="spinBox"/>
+       <widget class="QSpinBox" name="spinBox_pcsToFit"/>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="label_2">
@@ -80,7 +55,7 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_mWeight"/>
       </item>
       <item row="4" column="0">
        <widget class="QLabel" name="label_3">
@@ -96,51 +71,103 @@
         </property>
        </widget>
       </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="lineEdit_RASIS"/>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="lineEdit_LASIS"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="comboBox_regmode"/>
+      </item>
+      <item row="6" column="1">
+       <widget class="QLineEdit" name="lineEdit_Sacral"/>
+      </item>
       <item row="6" column="0">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Sacral:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
        <widget class="QLabel" name="label_5">
         <property name="text">
          <string>Lateral Epicondyle:</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="0">
+      <item row="7" column="1">
+       <widget class="QLineEdit" name="lineEdit_LEC"/>
+      </item>
+      <item row="8" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
          <string>Medial Epicondyle:</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0">
+      <item row="8" column="1">
+       <widget class="QLineEdit" name="lineEdit_MEC"/>
+      </item>
+      <item row="9" column="0">
        <widget class="QLabel" name="label_7">
         <property name="text">
          <string>Lateral Malleolus:</string>
         </property>
        </widget>
       </item>
-      <item row="9" column="0">
+      <item row="9" column="1">
+       <widget class="QLineEdit" name="lineEdit_LM"/>
+      </item>
+      <item row="10" column="0">
        <widget class="QLabel" name="label_8">
         <property name="text">
          <string>Medial Malleolus:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="lineEdit"/>
+      <item row="10" column="1">
+       <widget class="QLineEdit" name="lineEdit_MM"/>
       </item>
-      <item row="5" column="1">
-       <widget class="QLineEdit" name="lineEdit_2"/>
+      <item row="11" column="0">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Knee Options:</string>
+        </property>
+       </widget>
       </item>
-      <item row="6" column="1">
-       <widget class="QLineEdit" name="lineEdit_3"/>
+      <item row="11" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QCheckBox" name="checkBox_kneedof">
+          <property name="text">
+           <string>Abd. DOF</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBox_kneecorr">
+          <property name="text">
+           <string>Abd. Correction</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
-      <item row="7" column="1">
-       <widget class="QLineEdit" name="lineEdit_4"/>
+      <item row="12" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>GUI:</string>
+        </property>
+       </widget>
       </item>
-      <item row="8" column="1">
-       <widget class="QLineEdit" name="lineEdit_5"/>
-      </item>
-      <item row="9" column="1">
-       <widget class="QLineEdit" name="lineEdit_6"/>
+      <item row="12" column="1">
+       <widget class="QCheckBox" name="checkBox_GUI">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -157,6 +184,56 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEdit_id</tabstop>
+  <tabstop>comboBox_regmode</tabstop>
+  <tabstop>spinBox_pcsToFit</tabstop>
+  <tabstop>doubleSpinBox_mWeight</tabstop>
+  <tabstop>lineEdit_RASIS</tabstop>
+  <tabstop>lineEdit_LASIS</tabstop>
+  <tabstop>lineEdit_Sacral</tabstop>
+  <tabstop>lineEdit_LEC</tabstop>
+  <tabstop>lineEdit_MEC</tabstop>
+  <tabstop>lineEdit_LM</tabstop>
+  <tabstop>lineEdit_MM</tabstop>
+  <tabstop>checkBox_kneedof</tabstop>
+  <tabstop>checkBox_kneecorr</tabstop>
+  <tabstop>checkBox_GUI</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>Dialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>300</x>
+     <y>404</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>300</x>
+     <y>213</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>Dialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>300</x>
+     <y>404</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>300</x>
+     <y>213</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

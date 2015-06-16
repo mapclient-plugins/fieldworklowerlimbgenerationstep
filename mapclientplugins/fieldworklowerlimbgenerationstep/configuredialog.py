@@ -1,7 +1,7 @@
 
 
 from PySide import QtGui
-from mapclientplugins.fieldworklowerlimbgenerationstep.ui_configuredialog import Ui_ConfigureDialog
+from mapclientplugins.fieldworklowerlimbgenerationstep.ui_configuredialog import Ui_Dialog
 
 INVALID_STYLE_SHEET = 'background-color: rgba(239, 0, 0, 50)'
 DEFAULT_STYLE_SHEET = ''
@@ -11,14 +11,16 @@ class ConfigureDialog(QtGui.QDialog):
     Configure dialog to present the user with the options to configure this step.
     '''
 
-    def __init__(self, parent=None):
+    def __init__(self, data, parent=None):
         '''
         Constructor
         '''
         QtGui.QDialog.__init__(self, parent)
         
-        self._ui = Ui_ConfigureDialog()
+        self._ui = Ui_Dialog()
         self._ui.setupUi(self)
+
+        self._data = data
 
         # Keep track of the previous identifier so that we can track changes
         # and know how many occurrences of the current identifier there should
@@ -30,8 +32,11 @@ class ConfigureDialog(QtGui.QDialog):
 
         self._makeConnections()
 
+        for regmode in self._data.validRegistrationModes:
+            self._ui.comboBox_regmode.addItem(regmode)
+
     def _makeConnections(self):
-        self._ui.lineEdit0.textChanged.connect(self.validate)
+        self._ui.lineEdit_id.textChanged.connect(self.validate)
 
     def accept(self):
         '''
@@ -55,12 +60,12 @@ class ConfigureDialog(QtGui.QDialog):
         '''
         # Determine if the current identifier is unique throughout the workflow
         # The identifierOccursCount method is part of the interface to the workflow framework.
-        value = self.identifierOccursCount(self._ui.lineEdit0.text())
-        valid = (value == 0) or (value == 1 and self._previousIdentifier == self._ui.lineEdit0.text())
+        value = self.identifierOccursCount(self._ui.lineEdit_id.text())
+        valid = (value == 0) or (value == 1 and self._previousIdentifier == self._ui.lineEdit_id.text())
         if valid:
-            self._ui.lineEdit0.setStyleSheet(DEFAULT_STYLE_SHEET)
+            self._ui.lineEdit_id.setStyleSheet(DEFAULT_STYLE_SHEET)
         else:
-            self._ui.lineEdit0.setStyleSheet(INVALID_STYLE_SHEET)
+            self._ui.lineEdit_id.setStyleSheet(INVALID_STYLE_SHEET)
 
         return valid
 
@@ -70,10 +75,32 @@ class ConfigureDialog(QtGui.QDialog):
         set the _previousIdentifier value so that we can check uniqueness of the
         identifier over the whole of the workflow.
         '''
-        self._previousIdentifier = self._ui.lineEdit0.text()
+        self._previousIdentifier = self._ui.lineEdit_id.text()
         config = {}
-        config['identifier'] = self._ui.lineEdit0.text()
-        config[''] = self._ui.lineEdit1.text()
+        config['identifier'] = self._ui.lineEdit_id.text()
+        config['registration_mode'] = self._ui.comboBox_regmode.currentText()
+        config['pcs_to_fit'] = str(self._ui.spinBox_pcsToFit.value())
+        config['mweight'] = str(self._ui.doubleSpinBox_mWeight.value())
+        config['pelvis-RASIS'] = self._ui.lineEdit_RASIS.text()
+        config['pelvis-LASIS'] = self._ui.lineEdit_LASIS.text()
+        config['pelvis-Sacral'] = self._ui.lineEdit_sacral.text()
+        config['femur-LEC'] = self._ui.lineEdit_LEC.text()
+        config['femur-MEC'] = self._ui.lineEdit_MEC.text()
+        config['femur-MEC'] = self._ui.lineEdit_MEC.text()
+        config['tibiafibula-LM'] = self._ui.lineEdit_LM.text()
+        config['tibiafibula-MM'] = self._ui.lineEdit_MM.text()
+        if self._ui.checkBox_kneecorr.isChecked():
+            config['knee_corr'] = 'True'
+        else:
+            config['knee_corr'] = 'False'
+        if self._ui.checkBox_kneedof.isChecked():
+            config['knee_dof'] = 'True'
+        else:
+            config['knee_dof'] = 'False'
+        if self._ui.checkBox_GUI.isChecked():
+            config['GUI'] = 'True'
+        else:
+            config['GUI'] = 'False'
         return config
 
     def setConfig(self, config):
@@ -83,6 +110,31 @@ class ConfigureDialog(QtGui.QDialog):
         identifier over the whole of the workflow.
         '''
         self._previousIdentifier = config['identifier']
-        self._ui.lineEdit0.setText(config['identifier'])
-        self._ui.lineEdit1.setText(config[''])
+        self._ui.lineEdit_id.setText(config['identifier'])
+        self._ui.comboBox_regmode.setCurrentIndex(
+            self._data.validRegistrationModes.index(
+                config['registration_mode']
+                )
+            )
+        self._ui.spinBox_pcsToFit.setValue(int(config['pcs_to_fit']))
+        self._ui.doubleSpinBox_mWeight.setValue(float(config['mweight']))
+        self._ui.lineEdit_RASIS.setText(config['pelvis-RASIS'])
+        self._ui.lineEdit_LASIS.setText(config['pelvis-LASIS'])
+        self._ui.lineEdit_Sacral.setText(config['pelvis-Sacral'])
+        self._ui.lineEdit_LEC.setText(config['femur-LEC'])
+        self._ui.lineEdit_MEC.setText(config['femur-MEC'])
+        self._ui.lineEdit_MM.setText(config['tibiafibula-MM'])
+        self._ui.lineEdit_LM.setText(config['tibiafibula-LM'])
+        if config['knee_corr']=='True':
+            self._ui.checkBox_kneecorr.setChecked(bool(True))
+        else:
+            self._ui.checkBox_kneecorr.setChecked(bool(False))
+        if config['knee_dof']=='True':
+            self._ui.checkBox_kneedof.setChecked(bool(True))
+        else:
+            self._ui.checkBox_kneedof.setChecked(bool(False))
+        if config['GUI']=='True':
+            self._ui.checkBox_GUI.setChecked(bool(True))
+        else:
+            self._ui.checkBox_GUI.setChecked(bool(False))
 

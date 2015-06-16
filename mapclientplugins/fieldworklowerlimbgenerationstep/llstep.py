@@ -101,7 +101,7 @@ class LLTransformData(object):
     
 class LLStepData(object):
 
-    _registrationModes = ('shapemodel', 'uniformscaling', 'perbonescaling', 'manual')
+    _validRegistrationModes = ('shapemodel', 'uniformscaling', 'perbonescaling', 'manual')
     landmarkNames = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
                       'femur-MEC', 'femur-LEC', 'tibiafibula-MM',
                       'tibiafibula-LM',
@@ -112,18 +112,31 @@ class LLStepData(object):
                  'options':{'eps':1e-5},
                  },
 
-    def __init__(self):
+    def __init__(self, config):
+        self.config = config
         self.LL = bone_models.LowerLimbLeftAtlas('lower_limb_left')
         self.T = LLTransformData()
+        self.inputLandmarks = None # a dict of landmarks
+        self._targetLandmarksNames = None # list of strings matching keys in self.inputLandmarks
         self._targetLandmarks = None
         self.inputPCs = None
         self._inputModelDict = None
         self._outputModelDict = None
-        self._register = None
-        self.regMode = None
-        self.mWeight = 0.0
         self.landmarkErrors = None
         self.landmarkRMSE = None
+
+    def updateFromConfig(self):
+        targetLandmarkNames = [self.config[ln] for ln in self.landmarkNames]
+        self.targetLandmarkNames = targetLandmarkNames
+        self.nShapeModes = self.configs['pcs_to_fit']
+        if self.kneeCorr:
+            self.LL.enable_knee_adduction_correction()
+        else:
+            self.LL.disable_knee_adduction_correction()
+        if self.kneeDOF:
+            self.LL.enable_knee_adduction_dof
+        else:
+            self.LL.disable_knee_adduction_dof()
 
     @property
     def outputModelDict(self):
@@ -133,45 +146,89 @@ class LLStepData(object):
     @property
     def outputTransform(self):
         return self.T
+
+    @property
+    def validRegistrationModes(self):
+        return self._validRegistrationModes  
     
     @property
     def registrationMode(self):
-        return self._registrationMode
+        return self.config['registration_mode']
+        # return self._registrationMode
     
     @registrationMode.setter
     def registrationMode(self, value):
-        if value in self._registrationModes:
-            self._registrationMode = value
-            if value=='shapemodel':
-                self._register = _registerShapeModel
-            elif value=='uniformscale':
-                self._register = _registerUniformScaling
-            elif value=='perbonescaling':
-                self._register = _registerPerBoneScaling
+        if value in self.validRegistrationModes:
+            self.config['registration_mode'] = value
         else:
-            raise ValueError('Invalid registration mode. Given {}, must be one of {}'.format(value, self._registrationModes))
+            raise ValueError('Invalid registration mode. Given {}, must be one of {}'.format(value, self.validRegistrationModes))
+
+    @property
+    def targetLandmarkNames(self):
+        return self._targetLandmarkNames
+
+    @targetLandmarkNames.setter
+    def targetLandmarkNames(self, value):
+        if len(v)!=7:
+            raise ValueError('7 input landmark names required for {}'.format(self._landmarkNames))
+        else:
+            self._targetLandmarkNames = v
+            self._targetLandmarks = np.array([self.inputLandmarks[n] for n in self._targetLandmarkNames])
 
     @property
     def targetLandmarks(self):
+        self._targetLandmarks = np.array([self.inputLandmarks[n] for n in self._targetLandmarkNames])
         return self._targetLandmarks
-
-    @targetLandmarks.setter
-    def targetLandmarks(self, value):
-        v = np.array(value)
-        if v.shape!=(7,3):
-            raise ValueError('target landmark must have shape (7,3)')
-        else:
-            self._targetLandmarks = v
     
     @property
     def inputModelDict(self):
         return self._inputModelDict
 
-    @inputModelDict.setter(self, value)
+    @inputModelDict.setter
+    def inputModelDict(self, value):
         self._inputModelDict = value
 
+    @property
+    def mWeight(self):
+        return float(self.config['mweight'])
+
+    @mWeight.setter
+    def mWeight(self, value):
+        self.config['mweight'] = str(value)
+
+    @property
+    def nShapeModes(self):
+        return int(self.config['pcs_to_fit'])
+
+    @nShapeModes.setter
+    def nShapeModes(self, n):
+        self.config['pcs_to_fit'] = str(n)
+        self.T.shapeModes = np.arange(n, dtype=int)
+        if len(self.T.shapeModeWeights)<n:
+            self.T.shapeModeWeights = np.hstack([
+                                        self.T.shapeModelWeights,
+                                        np.zeros(n-len(self.T.shapeModeWeights))
+                                        ])
+        else:
+            self.T.shapeModeWeights = T.shapeModeWeights[:n]
+
+    @property
+    def kneeCorr(self):
+        return self.config['knee_corr']=='True'
+
+    @property
+    def kneeDOF(self):
+        return self.config['knee_dof']=='True'
+
     def register(self):
-        self._register(self)
+        self.updateFromConfig()
+        mode = self.config['registration_mode']
+        if mode=='shapemodel':
+            _registerShapeModel(self)
+        elif mode=='uniformscale':
+            _registerUniformScaling(self)
+        elif mode=='perbonescaling':
+            _registerPerBoneScaling(self)
 
 def _registerShapeModel(lldata):
     # do the fit

@@ -12,6 +12,11 @@ from mapclientplugins.fieldworklowerlimbgenerationstep.configuredialog import Co
 
 from mapclientplugins.fieldworklowerlimbgenerationstep import llstep
 
+LLLANDMARKS = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
+               'femur-MEC', 'femur-LEC', 'tibiafibula-MM',
+               'tibiafibula-LM',
+               )
+
 class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
     '''
     Skeleton step which is intended to be a helpful starting point
@@ -41,9 +46,16 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
                       'ju#geometrictransform'))
         self._config = {}
         self._config['identifier'] = ''
-        self._config[''] = ''
+        self._config['GUI'] = 'True'
+        self._config['registration_mode'] = 'shapemodel'
+        self._config['pcs_to_fit'] = '1'
+        self._config['mweight'] = '0.1'
+        self._config['knee_corr'] = 'False'
+        self._config['knee_dof'] = 'False'
+        for l in LLLANDMARKS:
+            self._config[l] = 'none'
 
-        self._data = llstep.LLStepData()
+        self._data = llstep.LLStepData(self._config)
 
 
     def execute(self):
@@ -53,7 +65,14 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         may be connected up to a button in a widget for example.
         '''
         # Put your execute step code here before calling the '_doneExecution' method.
-        self._doneExecution()
+        if self._config['GUI']=='True':
+            # start gui
+            self._widget = LLGenerationViewerDialog(self._data)
+            self._widget.setModal(True)
+            self._setCurrentWidget(self._widget)
+        else:
+            self._data.register()
+            self._doneExecution()
 
     def setPortData(self, index, dataIn):
         '''
@@ -87,7 +106,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         then set:
             self._configured = True
         '''
-        dlg = ConfigureDialog()
+        dlg = ConfigureDialog(self._data)
         dlg.identifierOccursCount = self._identifierOccursCount
         dlg.setConfig(self._config)
         dlg.validate()
@@ -123,7 +142,14 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         conf = QtCore.QSettings(configuration_file, QtCore.QSettings.IniFormat)
         conf.beginGroup('config')
         conf.setValue('identifier', self._config['identifier'])
-        conf.setValue('', self._config[''])
+        conf.setValue('registration_mode', self._config['registration_mode'])
+        for l in LLLANDMARKS:
+            conf.setValue(l, self._config[l])
+        conf.setValue('pcs_to_fit', self._config['pcs_to_fit'])
+        conf.setValue('mweight', self._config['mweight'])
+        conf.setValue('knee_corr', self._config['knee_corr'])
+        conf.setValue('knee_dof', self._config['knee_dof'])
+        conf.setValue('GUI', self._config['GUI'])
         conf.endGroup()
 
 
@@ -138,12 +164,21 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         conf = QtCore.QSettings(configuration_file, QtCore.QSettings.IniFormat)
         conf.beginGroup('config')
         self._config['identifier'] = conf.value('identifier', '')
-        self._config[''] = conf.value('', '')
+        self._config['registration_mode'] = conf.value('registration_mode', '')
+        self._config['pcs_to_fit'] = conf.value('pcs_to_fit', '')
+        self._config['knee_corr'] = conf.value('knee_corr', '')
+        self._config['knee_dof'] = conf.value('knee_dof', '')
+        self._config['mweight'] = conf.value('mweight', '')
+        for l in LLLANDMARKS:
+            self._config[l] = conf.value(l, '')
+        self._config['GUI'] = conf.value('GUI', 'True')
         conf.endGroup()
 
         d = ConfigureDialog()
         d.identifierOccursCount = self._identifierOccursCount
         d.setConfig(self._config)
         self._configured = d.validate()
+
+        self._data.updateFromConfig()
 
 
