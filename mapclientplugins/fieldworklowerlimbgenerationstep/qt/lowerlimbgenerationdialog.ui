@@ -301,7 +301,7 @@
                 </layout>
                </item>
                <item row="2" column="1">
-                <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+                <widget class="QDoubleSpinBox" name="doubleSpinBox_scaling"/>
                </item>
                <item row="1" column="1">
                 <layout class="QGridLayout" name="gridLayout_3">
@@ -387,7 +387,7 @@
               <x>0</x>
               <y>0</y>
               <width>332</width>
-              <height>389</height>
+              <height>388</height>
              </rect>
             </property>
             <attribute name="label">
@@ -505,7 +505,7 @@
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="QLineEdit" name="landmarkErrorLineEdit">
+                 <widget class="QLineEdit" name="lineEdit_landmarkError">
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
@@ -525,7 +525,7 @@
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QLineEdit" name="mDistLineEdit">
+                 <widget class="QLineEdit" name="lineEdit_mDist">
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>

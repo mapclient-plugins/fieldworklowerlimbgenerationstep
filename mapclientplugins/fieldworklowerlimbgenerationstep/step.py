@@ -67,7 +67,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         # Put your execute step code here before calling the '_doneExecution' method.
         if self._config['GUI']=='True':
             # start gui
-            self._widget = LLGenerationViewerDialog(self._data)
+            self._widget = LLGenerationViewerDialog(self._data, self._doneExecution)
             self._widget.setModal(True)
             self._setCurrentWidget(self._widget)
         else:

@@ -125,6 +125,12 @@ class LLStepData(object):
         self.landmarkErrors = None
         self.landmarkRMSE = None
 
+    def resetLL(self):
+        self.LL = bone_models.LowerLimbLeftAtlas('lower_limb_left')
+        self.T = LLTransformData()
+        self.landmarkErrors = None
+        self.landmarkRMSE = None
+
     def updateFromConfig(self):
         targetLandmarkNames = [self.config[ln] for ln in self.landmarkNames]
         self.targetLandmarkNames = targetLandmarkNames
@@ -216,9 +222,23 @@ class LLStepData(object):
     def kneeCorr(self):
         return self.config['knee_corr']=='True'
 
+    @kneeCorr.setter
+    def kneeCorr(self, value):
+        if value:
+            self.config['knee_corr'] = 'True'
+        else:
+            self.config['knee_corr'] = 'False'
+
     @property
     def kneeDOF(self):
         return self.config['knee_dof']=='True'
+
+    @kneeDOF.setter
+    def kneeDOF(self, value):
+        if value:
+            self.config['knee_dof'] = 'True'
+        else:
+            self.config['knee_dof'] = 'False'
 
     def register(self):
         self.updateFromConfig()
