@@ -1,56 +1,64 @@
 """
 Auto lower limb registration
 """
-
+import os
 import numpy as np
 import copy
-import shelve
-import cPickle
-import time
 
 from fieldwork.field import geometric_field
 from gias.musculoskeletal import mocap_landmark_preprocess
-from gias.common import fieldvi, math
-from gias.learning import PCA
-
-import trcdata
-import bone_models
-import model_core
-import lowerlimbatlasfit
+from gias.musculoskeletal.bonemodels import bonemodels
+from gias.musculoskeletal.bonemodels import lowerlimbatlasfit
 
 class LLTransformData(object):
+    SHAPEMODESMAX = 100
 
     def __init__(self):
         self.pelvisRigid = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         self.hipRot = np.array([0.0, 0.0, 0.0])
         self.kneeRot = np.array([0.0, 0.0, 0.0])
-        self.shapeModes = []
-        self.shapeModeWeights = []
+        self.nShapeModes = 1
+        self.shapeModes = [0,]
+        self._shapeModeWeights = np.zeros(self.SHAPEMODESMAX, dtype=float)
         self.uniformScaling = 1.0
         self.pelvisScaling = 1.0
         self.femurScaling = 1.0
         self.petallaScaling = 1.0
         self.tibfibScaling = 1.0
+        self.kneeDOF = False
+        self.kneeCorr = False
 
         self._shapeModelX = None
         self._uniformScalingX = None
         self._perBoneScalingX = None
 
     @property
+    def shapeModeWeights(self):
+        return self._shapeModeWeights[:self.nShapeModes]
+
+    @shapeModeWeights.setter
+    def shapeModeWeights(self, value):
+        self._shapeModeWeights[:len(value)] = value
+
+    @property
     def shapeModelX(self):
+        if self.kneeDOF:
+            kneeRot = self.kneeRot[[0,2]]
+        else:
+            kneeRot = self.kneeRot[0]
         self._shapeModelX = np.hstack([
-                                self.shapeModeWeights,
+                                self.shapeModeWeights[:self.nShapeModes],
                                 self.pelvisRigid,
                                 self.hipRot,
-                                self.kneeRot
+                                kneeRot
                                 ])
         return self._shapeModelX
 
     @shapeModelX.setter
     def shapeModelX(self, value):
-        a = len(self.shapeModes)
+        a = self.nShapeModes
         self._shapeModelX = value
-        self.shapeModeWeights = value[:a]
+        self.shapeModeWeights = value
         self.pelvisRigid = value[a:a+6]
         self.hipRot = value[a+6:a+9]
         self.kneeRot = value[a+9:a+12]
@@ -98,23 +106,43 @@ class LLTransformData(object):
         self.pelvisRigid = value[a:a+6]
         self.hipRot = value[a+6:a+9]
         self.kneeRot = value[a+9:a+12]
+
+SELF_DIRECTORY = os.path.split(__file__)[0]
     
 class LLStepData(object):
+
+    _shapeModelFilename = os.path.join(SELF_DIRECTORY, 'data/shape_models/LLP26_rigid.pc')
+    _boneModelFilenames = {'pelvis': (os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/pelvis_combined_cubic_mean_rigid_LLP26.geof'),
+                                      os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/pelvis_combined_cubic_flat.ens'),
+                                      os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/pelvis_combined_cubic_flat.mesh'),
+                                      ),
+                           'femur': (os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/femur_left_mean_rigid_LLP26.geof'),
+                                     os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/femur_left_quartic_flat.ens'),
+                                     os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/femur_left_quartic_flat.mesh'),
+                                     ),
+                           'patella': (os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/patella_left_mean_rigid_LLP26.geof'),
+                                       os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/patella_11_left.ens'),
+                                       os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/patella_11_left.mesh'),
+                                       ),
+                           'tibiafibula': (os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/tibia_fibula_cubic_left_mean_rigid_LLP26.geof'),
+                                           os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/tibia_fibula_left_cubic_flat.ens'),
+                                           os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/tibia_fibula_left_cubic_flat.mesh'),
+                                           ),
+                            }
 
     _validRegistrationModes = ('shapemodel', 'uniformscaling', 'perbonescaling', 'manual')
     landmarkNames = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
                       'femur-MEC', 'femur-LEC', 'tibiafibula-MM',
                       'tibiafibula-LM',
                       )
-    _minArgs = {'method':'BFGS',
+    minArgs = {'method':'BFGS',
                  'jac':False,
                  'bounds':None, 'tol':1e-6,
                  'options':{'eps':1e-5},
-                 },
+                 }
 
     def __init__(self, config):
         self.config = config
-        self.LL = bone_models.LowerLimbLeftAtlas('lower_limb_left')
         self.T = LLTransformData()
         self.inputLandmarks = None # a dict of landmarks
         self._targetLandmarksNames = None # list of strings matching keys in self.inputLandmarks
@@ -124,9 +152,16 @@ class LLStepData(object):
         self._outputModelDict = None
         self.landmarkErrors = None
         self.landmarkRMSE = None
+        self.fitMDist = None
+
+    def loadData(self):
+        self.LL = bonemodels.LowerLimbLeftAtlas('lower_limb_left')
+        self.LL.bone_files = self._boneModelFilenames
+        self.LL.combined_pcs_filename = self._shapeModelFilename
+        self.LL.load_bones()
 
     def resetLL(self):
-        self.LL = bone_models.LowerLimbLeftAtlas('lower_limb_left')
+        self.LL.update_all_models(*self.LL._neutral_params)
         self.T = LLTransformData()
         self.landmarkErrors = None
         self.landmarkRMSE = None
@@ -134,7 +169,7 @@ class LLStepData(object):
     def updateFromConfig(self):
         targetLandmarkNames = [self.config[ln] for ln in self.landmarkNames]
         self.targetLandmarkNames = targetLandmarkNames
-        self.nShapeModes = self.configs['pcs_to_fit']
+        self.nShapeModes = self.config['pcs_to_fit']
         if self.kneeCorr:
             self.LL.enable_knee_adduction_correction()
         else:
@@ -143,6 +178,17 @@ class LLStepData(object):
             self.LL.enable_knee_adduction_dof
         else:
             self.LL.disable_knee_adduction_dof()
+
+    def updateLLModel(self):
+        """update LL model using current transformations.
+        Just shape model deformations
+        """
+        self.LL.update_all_models(self.T.shapeModeWeights,
+                                  self.T.shapeModes,
+                                  self.T.pelvisRigid,
+                                  self.T.hipRot,
+                                  self.T.kneeRot
+                                  )
 
     @property
     def outputModelDict(self):
@@ -175,11 +221,12 @@ class LLStepData(object):
 
     @targetLandmarkNames.setter
     def targetLandmarkNames(self, value):
-        if len(v)!=7:
+        if len(value)!=7:
             raise ValueError('7 input landmark names required for {}'.format(self._landmarkNames))
         else:
-            self._targetLandmarkNames = v
-            self._targetLandmarks = np.array([self.inputLandmarks[n] for n in self._targetLandmarkNames])
+            self._targetLandmarkNames = value
+            if self.inputLandmarks is not None:
+                self._targetLandmarks = np.array([self.inputLandmarks[n] for n in self._targetLandmarkNames])
 
     @property
     def targetLandmarks(self):
@@ -209,14 +256,15 @@ class LLStepData(object):
     @nShapeModes.setter
     def nShapeModes(self, n):
         self.config['pcs_to_fit'] = str(n)
+        n = int(n)
         self.T.shapeModes = np.arange(n, dtype=int)
-        if len(self.T.shapeModeWeights)<n:
-            self.T.shapeModeWeights = np.hstack([
-                                        self.T.shapeModelWeights,
-                                        np.zeros(n-len(self.T.shapeModeWeights))
-                                        ])
-        else:
-            self.T.shapeModeWeights = T.shapeModeWeights[:n]
+        # if len(self.T.shapeModeWeights)<n:
+        #     self.T.shapeModeWeights = np.hstack([
+        #                                 self.T.shapeModeWeights,
+        #                                 np.zeros(n-len(self.T.shapeModeWeights))
+        #                                 ])
+        # else:
+        #     self.T.shapeModeWeights = T.shapeModeWeights[:n]
 
     @property
     def kneeCorr(self):
@@ -224,10 +272,13 @@ class LLStepData(object):
 
     @kneeCorr.setter
     def kneeCorr(self, value):
+        self.T.kneeCorr = value
         if value:
             self.config['knee_corr'] = 'True'
+            self.LL.enable_knee_adduction_correction()
         else:
             self.config['knee_corr'] = 'False'
+            self.LL.disable_knee_adduction_correction()
 
     @property
     def kneeDOF(self):
@@ -235,20 +286,27 @@ class LLStepData(object):
 
     @kneeDOF.setter
     def kneeDOF(self, value):
+        self.T.kneeDOF = value
         if value:
             self.config['knee_dof'] = 'True'
+            self.LL.enable_knee_adduction_dof()
         else:
             self.config['knee_dof'] = 'False'
+            self.LL.disable_knee_adduction_dof()
 
     def register(self):
         self.updateFromConfig()
         mode = self.config['registration_mode']
         if mode=='shapemodel':
-            _registerShapeModel(self)
+            print(self.T.shapeModelX)
+            output = _registerShapeModel(self)
         elif mode=='uniformscale':
-            _registerUniformScaling(self)
+            print(self.T.uniformScalingX)
+            output = _registerUniformScaling(self)
         elif mode=='perbonescaling':
-            _registerPerBoneScaling(self)
+            print(self.T.perBoneScalingX)
+            output = _registerPerBoneScaling(self)
+        return output
 
 def _registerShapeModel(lldata):
     # do the fit
@@ -262,11 +320,13 @@ def _registerShapeModel(lldata):
                     lldata.T.shapeModes,
                     lldata.mWeight,
                     x0=lldata.T.shapeModelX,
-                    minimise_args=self.min_args,
+                    minimise_args=lldata.minArgs,
                     )
     lldata.landmarkRMSE = optLandmarkRMSE
     lldata.landmarkErrors = optLandmarkDist
+    lldata.fitMDist =  fitInfo['mahalanobis_distance']
     lldata.shapeModelX = xFitted[-1]
+    return xFitted, optLandmarkDist, optLandmarkRMSE, fitInfo
 
 def _registerUniformScaling(lldata):
     raise NotImplementedError

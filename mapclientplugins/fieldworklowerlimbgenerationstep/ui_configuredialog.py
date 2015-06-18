@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'qt/configuredialog.ui'
 #
-# Created: Tue Jun 16 23:32:51 2015
-#      by: pyside-uic 0.2.15 running on PySide 1.2.2
+# Created: Thu Jun 18 14:27:46 2015
+#      by: pyside-uic 0.2.15 running on PySide 1.2.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -33,12 +33,15 @@ class Ui_Dialog(object):
         self.label.setObjectName("label")
         self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label)
         self.spinBox_pcsToFit = QtGui.QSpinBox(self.configGroupBox)
+        self.spinBox_pcsToFit.setMinimum(1)
+        self.spinBox_pcsToFit.setMaximum(99)
         self.spinBox_pcsToFit.setObjectName("spinBox_pcsToFit")
         self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.spinBox_pcsToFit)
         self.label_2 = QtGui.QLabel(self.configGroupBox)
         self.label_2.setObjectName("label_2")
         self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.label_2)
         self.doubleSpinBox_mWeight = QtGui.QDoubleSpinBox(self.configGroupBox)
+        self.doubleSpinBox_mWeight.setSingleStep(0.1)
         self.doubleSpinBox_mWeight.setObjectName("doubleSpinBox_mWeight")
         self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.doubleSpinBox_mWeight)
         self.label_3 = QtGui.QLabel(self.configGroupBox)

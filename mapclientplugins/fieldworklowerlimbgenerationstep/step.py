@@ -11,6 +11,7 @@ from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclientplugins.fieldworklowerlimbgenerationstep.configuredialog import ConfigureDialog
 
 from mapclientplugins.fieldworklowerlimbgenerationstep import llstep
+from mapclientplugins.fieldworklowerlimbgenerationstep.lowerlimbgenerationdialog import LowerLimbGenerationDialog
 
 LLLANDMARKS = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
                'femur-MEC', 'femur-LEC', 'tibiafibula-MM',
@@ -53,7 +54,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         self._config['knee_corr'] = 'False'
         self._config['knee_dof'] = 'False'
         for l in LLLANDMARKS:
-            self._config[l] = 'none'
+            self._config[l] = ''
 
         self._data = llstep.LLStepData(self._config)
 
@@ -65,9 +66,11 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         may be connected up to a button in a widget for example.
         '''
         # Put your execute step code here before calling the '_doneExecution' method.
+        self._data.loadData()
+        self._data.updateFromConfig()
         if self._config['GUI']=='True':
             # start gui
-            self._widget = LLGenerationViewerDialog(self._data, self._doneExecution)
+            self._widget = LowerLimbGenerationDialog(self._data, self._doneExecution)
             self._widget.setModal(True)
             self._setCurrentWidget(self._widget)
         else:
@@ -106,7 +109,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         then set:
             self._configured = True
         '''
-        dlg = ConfigureDialog(self._data)
+        dlg = ConfigureDialog()
         dlg.identifierOccursCount = self._identifierOccursCount
         dlg.setConfig(self._config)
         dlg.validate()
@@ -178,7 +181,5 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         d.identifierOccursCount = self._identifierOccursCount
         d.setConfig(self._config)
         self._configured = d.validate()
-
-        self._data.updateFromConfig()
 
 

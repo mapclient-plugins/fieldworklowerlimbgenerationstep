@@ -6,12 +6,14 @@ from mapclientplugins.fieldworklowerlimbgenerationstep.ui_configuredialog import
 INVALID_STYLE_SHEET = 'background-color: rgba(239, 0, 0, 50)'
 DEFAULT_STYLE_SHEET = ''
 
+REG_MODES = ('shapemodel', 'uniformscaling', 'perbonescaling', 'manual')
+
 class ConfigureDialog(QtGui.QDialog):
     '''
     Configure dialog to present the user with the options to configure this step.
     '''
 
-    def __init__(self, data, parent=None):
+    def __init__(self, parent=None):
         '''
         Constructor
         '''
@@ -19,8 +21,6 @@ class ConfigureDialog(QtGui.QDialog):
         
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
-
-        self._data = data
 
         # Keep track of the previous identifier so that we can track changes
         # and know how many occurrences of the current identifier there should
@@ -32,7 +32,7 @@ class ConfigureDialog(QtGui.QDialog):
 
         self._makeConnections()
 
-        for regmode in self._data.validRegistrationModes:
+        for regmode in REG_MODES:
             self._ui.comboBox_regmode.addItem(regmode)
 
     def _makeConnections(self):
@@ -83,7 +83,7 @@ class ConfigureDialog(QtGui.QDialog):
         config['mweight'] = str(self._ui.doubleSpinBox_mWeight.value())
         config['pelvis-RASIS'] = self._ui.lineEdit_RASIS.text()
         config['pelvis-LASIS'] = self._ui.lineEdit_LASIS.text()
-        config['pelvis-Sacral'] = self._ui.lineEdit_sacral.text()
+        config['pelvis-Sacral'] = self._ui.lineEdit_Sacral.text()
         config['femur-LEC'] = self._ui.lineEdit_LEC.text()
         config['femur-MEC'] = self._ui.lineEdit_MEC.text()
         config['femur-MEC'] = self._ui.lineEdit_MEC.text()
@@ -112,9 +112,7 @@ class ConfigureDialog(QtGui.QDialog):
         self._previousIdentifier = config['identifier']
         self._ui.lineEdit_id.setText(config['identifier'])
         self._ui.comboBox_regmode.setCurrentIndex(
-            self._data.validRegistrationModes.index(
-                config['registration_mode']
-                )
+            REG_MODES.index(config['registration_mode'])
             )
         self._ui.spinBox_pcsToFit.setValue(int(config['pcs_to_fit']))
         self._ui.doubleSpinBox_mWeight.setValue(float(config['mweight']))

@@ -40,14 +40,15 @@ import copy
 
 
 class _ExecThread(QThread):
-    update = Signal(None)
+    update = Signal(tuple)
 
     def __init__(self, func):
         QThread.__init__(self)
         self.func = func
 
     def run(self):
-        output = self.func(self.update)
+        output = self.func()
+        self.update.emit(output)
 
 class LowerLimbGenerationDialog(QDialog):
     '''
@@ -87,7 +88,7 @@ class LowerLimbGenerationDialog(QDialog):
         self._setupGui()
         self._makeConnections()
         self._initialiseObjectTable()
-        self._initialiseSettings()
+        self._updateConfigs()
         self._refresh()
 
     def _initViewerObjects(self):
@@ -101,7 +102,7 @@ class LowerLimbGenerationDialog(QDialog):
                                                                )
                                     )
         # 'none' is first elem in self._landmarkNames, so skip that
-        for ln, lcoords in self.data.inputLandmarks.items:
+        for ln, lcoords in self.data.inputLandmarks.items():
             self._objects.addObject(ln, MayaviViewerLandmark(ln,
                                                              lcoords,
                                                              renderArgs=self._landmarkRenderArgs
@@ -133,64 +134,71 @@ class LowerLimbGenerationDialog(QDialog):
         # landmarks page
         if self.data.targetLandmarkNames is not None:
             inputLandmarkNames = self.data.inputLandmarks.keys()
-            self._ui.comboBox_RASIS.setCurrentIndex(
-                inputLandmarkNames.index(
-                    self.data.targetLandmarkNames[0],
+            if self.data.targetLandmarkNames[0]:
+                self._ui.comboBox_LASIS.setCurrentIndex(
+                    inputLandmarkNames.index(
+                        self.data.targetLandmarkNames[0],
+                        )
                     )
-                )
-            self._ui.comboBox_LASIS.setCurrentIndex(
+            if self.data.targetLandmarkNames[1]:
+                self._ui.comboBox_RASIS.setCurrentIndex(
                 inputLandmarkNames.index(
                     self.data.targetLandmarkNames[1],
                     )
                 )
-            self._ui.comboBox_Sacral.setCurrentIndex(
+            if self.data.targetLandmarkNames[2]:
+                self._ui.comboBox_Sacral.setCurrentIndex(
                 inputLandmarkNames.index(
                     self.data.targetLandmarkNames[2],
                     )
                 )
-            self._ui.comboBox_LEC.setCurrentIndex(
+            if self.data.targetLandmarkNames[3]:
+                self._ui.comboBox_LEC.setCurrentIndex(
                 inputLandmarkNames.index(
                     self.data.targetLandmarkNames[3],
                     )
                 )
-            self._ui.comboBox_MEC.setCurrentIndex(
+            if self.data.targetLandmarkNames[4]:
+                self._ui.comboBox_MEC.setCurrentIndex(
                 inputLandmarkNames.index(
                     self.data.targetLandmarkNames[4],
                     )
                 )
-            self._ui.comboBox_LM.setCurrentIndex(
+            if self.data.targetLandmarkNames[5]:
+                self._ui.comboBox_LM.setCurrentIndex(
                 inputLandmarkNames.index(
                     self.data.targetLandmarkNames[5],
                     )
                 )
-            self._ui.comboBox_MM.setCurrentIndex(
+            if self.data.targetLandmarkNames[6]:
+                self._ui.comboBox_MM.setCurrentIndex(
                 inputLandmarkNames.index(
                     self.data.targetLandmarkNames[6],
                     )
                 )
 
         # manual reg page
-        self._ui.doubleSpinBox_pc1.setValue(self.data.T.shapeModeWeights[0])
-        self._ui.doubleSpinBox_pc2.setValue(self.data.T.shapeModeWeights[1])
-        self._ui.doubleSpinBox_pc3.setValue(self.data.T.shapeModeWeights[2])
-        self._ui.doubleSpinBox_pc4.setValue(self.data.T.shapeModeWeights[3])
+        self._ui.doubleSpinBox_pc1.setValue(self.data.T._shapeModeWeights[0])
+        self._ui.doubleSpinBox_pc2.setValue(self.data.T._shapeModeWeights[1])
+        self._ui.doubleSpinBox_pc3.setValue(self.data.T._shapeModeWeights[2])
+        self._ui.doubleSpinBox_pc4.setValue(self.data.T._shapeModeWeights[3])
         self._ui.doubleSpinBox_scaling.setValue(self.data.T.uniformScaling)
         self._ui.doubleSpinBox_ptx.setValue(self.data.T.pelvisRigid[0])
         self._ui.doubleSpinBox_pty.setValue(self.data.T.pelvisRigid[1])
         self._ui.doubleSpinBox_ptz.setValue(self.data.T.pelvisRigid[2])
-        self._ui.doubleSpinBox_prx.setValue(self.data.T.pelvisRigid[3])
-        self._ui.doubleSpinBox_pry.setValue(self.data.T.pelvisRigid[4])
-        self._ui.doubleSpinBox_prz.setValue(self.data.T.pelvisRigid[5])
-        self._ui.doubleSpinBox_hipx.setValue(self.data.T.hipRot[0])
-        self._ui.doubleSpinBox_hipy.setValue(self.data.T.hipRot[1])
-        self._ui.doubleSpinBox_hipz.setValue(self.data.T.hipRot[2])
-        self._ui.doubleSpinBox_kneex.setValue(self.data.T.kneeRot[0])
-        self._ui.doubleSpinBox_kneey.setValue(self.data.T.kneeRot[1])
-        self._ui.doubleSpinBox_kneez.setValue(self.data.T.kneeRot[2])
+        self._ui.doubleSpinBox_prx.setValue(np.rad2deg(self.data.T.pelvisRigid[3]))
+        self._ui.doubleSpinBox_pry.setValue(np.rad2deg(self.data.T.pelvisRigid[4]))
+        self._ui.doubleSpinBox_prz.setValue(np.rad2deg(self.data.T.pelvisRigid[5]))
+        self._ui.doubleSpinBox_hipx.setValue(np.rad2deg(self.data.T.hipRot[0]))
+        self._ui.doubleSpinBox_hipy.setValue(np.rad2deg(self.data.T.hipRot[1]))
+        self._ui.doubleSpinBox_hipz.setValue(np.rad2deg(self.data.T.hipRot[2]))
+        self._ui.doubleSpinBox_kneex.setValue(np.rad2deg(self.data.T.kneeRot[0]))
+        self._ui.doubleSpinBox_kneey.setValue(np.rad2deg(self.data.T.kneeRot[1]))
+        self._ui.doubleSpinBox_kneez.setValue(np.rad2deg(self.data.T.kneeRot[2]))
 
         # auto reg page
         self._ui.comboBox_regmode.setCurrentIndex(
-            self._data.validRegistrationModes.index(
+            self.data.validRegistrationModes.index(
                 self.data.registrationMode,
                 )
             )
@@ -201,8 +209,8 @@ class LowerLimbGenerationDialog(QDialog):
 
     def _saveConfigs(self):
         # landmarks page
-        self.data.targetLandmarkNames = (str(self._ui.comboBox_RASIS.currentText()),
-                                         str(self._ui.comboBox_LASIS.currentText()),
+        self.data.targetLandmarkNames = (str(self._ui.comboBox_LASIS.currentText()),
+                                         str(self._ui.comboBox_RASIS.currentText()),
                                          str(self._ui.comboBox_Sacral.currentText()),
                                          str(self._ui.comboBox_LEC.currentText()),
                                          str(self._ui.comboBox_MEC.currentText()),
@@ -211,26 +219,26 @@ class LowerLimbGenerationDialog(QDialog):
                                         )
 
         # manual reg page
-        self.data.T.shapeModeWeights[0] = self._ui.doubleSpinBox_pc1.value()
-        self.data.T.shapeModeWeights[1] = self._ui.doubleSpinBox_pc2.value()
-        self.data.T.shapeModeWeights[2] = self._ui.doubleSpinBox_pc3.value()
-        self.data.T.shapeModeWeights[3] = self._ui.doubleSpinBox_pc4.value()
-        self.data.T.uniformScaling = self._ui.doubleSpinBox_scaling.setValue()
+        self.data.T._shapeModeWeights[0] = self._ui.doubleSpinBox_pc1.value()
+        self.data.T._shapeModeWeights[1] = self._ui.doubleSpinBox_pc2.value()
+        self.data.T._shapeModeWeights[2] = self._ui.doubleSpinBox_pc3.value()
+        self.data.T._shapeModeWeights[3] = self._ui.doubleSpinBox_pc4.value()
+        self.data.T.uniformScaling = self._ui.doubleSpinBox_scaling.value()
         self.data.T.pelvisRigid[0] = self._ui.doubleSpinBox_ptx.value()
         self.data.T.pelvisRigid[1] = self._ui.doubleSpinBox_pty.value()
         self.data.T.pelvisRigid[2] = self._ui.doubleSpinBox_ptz.value()
-        self.data.T.pelvisRigid[3] = self._ui.doubleSpinBox_prx.value()
-        self.data.T.pelvisRigid[4] = self._ui.doubleSpinBox_pry.value()
-        self.data.T.pelvisRigid[5] = self._ui.doubleSpinBox_prz.value()
-        self.data.T.hipRot[0] = self._ui.doubleSpinBox_hipx.value()
-        self.data.T.hipRot[1] = self._ui.doubleSpinBox_hipy.value()
-        self.data.T.hipRot[2] = self._ui.doubleSpinBox_hipz.value()
-        self.data.T.kneeRot[0] = self._ui.doubleSpinBox_kneex.value()
-        self.data.T.kneeRot[1] = self._ui.doubleSpinBox_kneey.value()
-        self.data.T.kneeRot[2] = self._ui.doubleSpinBox_kneez.value()
+        self.data.T.pelvisRigid[3] = np.deg2rad(self._ui.doubleSpinBox_prx.value())
+        self.data.T.pelvisRigid[4] = np.deg2rad(self._ui.doubleSpinBox_pry.value())
+        self.data.T.pelvisRigid[5] = np.deg2rad(self._ui.doubleSpinBox_prz.value())
+        self.data.T.hipRot[0] = np.deg2rad(self._ui.doubleSpinBox_hipx.value())
+        self.data.T.hipRot[1] = np.deg2rad(self._ui.doubleSpinBox_hipy.value())
+        self.data.T.hipRot[2] = np.deg2rad(self._ui.doubleSpinBox_hipz.value())
+        self.data.T.kneeRot[0] = np.deg2rad(self._ui.doubleSpinBox_kneex.value())
+        self.data.T.kneeRot[1] = np.deg2rad(self._ui.doubleSpinBox_kneey.value())
+        self.data.T.kneeRot[2] = np.deg2rad(self._ui.doubleSpinBox_kneez.value())
 
         # auto reg page
-        self.data.registrationMode = str(self._ui.comboBox_regmode.currentIndex())
+        self.data.registrationMode = str(self._ui.comboBox_regmode.currentText())
         self.data.nShapeModes = self._ui.spinBox_pcsToFit.value()
         self.data.mWeight = self._ui.spinBox_mWeight.value()
         self.data.kneeCorr = self._ui.checkBox_kneecorr.isChecked()
@@ -244,14 +252,33 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.screenshotSaveButton.clicked.connect(self._saveScreenShot)
         
         # manual reg
+        self._ui.doubleSpinBox_pc1.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_pc2.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_pc3.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_pc4.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_scaling.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_ptx.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_pty.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_ptz.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_prx.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_pry.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_prz.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_hipx.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_hipy.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_hipz.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_kneex.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_kneey.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_kneez.valueChanged.connect(self._manualRegChanged)
         self._ui.pushButton_manual_reset.clicked.connect(self._reset)
         self._ui.pushButton_manual_accept.clicked.connect(self._accept)
 
         # auto reg
+        self._ui.checkBox_kneecorr.stateChanged.connect(self._autoRegChanged)
+        self._ui.checkBox_kneedof.stateChanged.connect(self._autoRegChanged)
         self._ui.pushButton_auto_reset.clicked.connect(self._reset)
         self._ui.pushButton_auto_accept.clicked.connect(self._accept)
         self._ui.pushButton_auto_abort.clicked.connect(self._abort)
-        self._ui.pushButton_auto_reg.clicked.connect(self._auto_reg)
+        self._ui.pushButton_auto_reg.clicked.connect(self._autoReg)
 
     def _initialiseObjectTable(self):
         self._ui.tableWidget.setRowCount(self._objects.getNumberOfObjects())
@@ -262,8 +289,8 @@ class LowerLimbGenerationDialog(QDialog):
         
         # 'none' is first elem in self._landmarkNames, so skip that
         row = 0
-        for li, ln in enumerate(self.data.inputLandmarks.key()):
-            self._addObjectToTable(li, ln, self._objects.getObject(ln))
+        for li, ln in enumerate(self.data.inputLandmarks.keys()):
+            self._addObjectToTable(li, ln, self._objects.getObject(ln), checked=True)
             row+=1
 
         for mn in self.data.LL.models.keys():
@@ -322,22 +349,31 @@ class LowerLimbGenerationDialog(QDialog):
     def _getSelectedScalarName(self):
         return 'none'
 
-    def drawObjects(self):
+    def _drawObjects(self):
         for name in self._objects.getObjectNames():
             self._objects.getObject(name).draw(self._scene)
 
-    def _updateSceneModels(self, P):
+    def _updateSceneModels(self):
         for mn in self.data.LL.models:
             meshObj = self._objects.getObject(mn)
             meshObj.updateGeometry(None, self._scene)
 
-    def _regUpdate(self):
+    def _manualRegChanged(self):
+        self._saveConfigs()
+        self.data.updateLLModel()
+        self._updateSceneModels()
+
+    def _autoRegChanged(self):
+        self.data.kneeCorr = self._ui.checkBox_kneecorr.isChecked()
+        self.data.kneeDOF = self._ui.checkBox_kneedof.isChecked()
+
+    def _regUpdate(self, output):
         # update models in scene
         self._updateSceneModels()
 
         # update error field
-        self._ui.lineEditRMSE.setText('{:12.10f}'.format(RMSE))
-        self._ui.lineEditTransformation.setText(', '.join(['{:5.2f}'.format(t) for t in T]))
+        self._ui.lineEdit_landmarkError.setText('{:5.2f}'.format(self.data.landmarkRMSE))
+        self._ui.lineEdit_mDist.setText('{:5.2f}'.format(self.data.fitMDist))
 
         # unlock reg ui
         self._regUnlockUI()
@@ -404,13 +440,13 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.pushButton_auto_abort.setEnabled(True)
         self._ui.pushButton_auto_reg.setEnabled(True)
 
-    def auto_reg(self):
+    def _autoReg(self):
         self._saveConfigs()
         self._worker.start()
         self._regLockUI()
 
     def _reset(self):
-        self.data.reset()
+        self.data.resetLL()
         self._updateConfigs()
         self._updateSceneModels()
 
@@ -421,7 +457,7 @@ class LowerLimbGenerationDialog(QDialog):
     def _accept(self):
         self._saveConfigs()
         self._close()
-        self.doneExecution
+        self.doneExecution()
 
     def _abort(self):
         self._reset()
