@@ -178,23 +178,27 @@ class LowerLimbGenerationDialog(QDialog):
                 )
 
         # manual reg page
+        print(self.data.T._shapeModeWeights[:self.data.T.nShapeModes])
         self._ui.doubleSpinBox_pc1.setValue(self.data.T._shapeModeWeights[0])
         self._ui.doubleSpinBox_pc2.setValue(self.data.T._shapeModeWeights[1])
         self._ui.doubleSpinBox_pc3.setValue(self.data.T._shapeModeWeights[2])
         self._ui.doubleSpinBox_pc4.setValue(self.data.T._shapeModeWeights[3])
         self._ui.doubleSpinBox_scaling.setValue(self.data.T.uniformScaling)
+        print(self.data.T.pelvisRigid)
         self._ui.doubleSpinBox_ptx.setValue(self.data.T.pelvisRigid[0])
         self._ui.doubleSpinBox_pty.setValue(self.data.T.pelvisRigid[1])
         self._ui.doubleSpinBox_ptz.setValue(self.data.T.pelvisRigid[2])
         self._ui.doubleSpinBox_prx.setValue(np.rad2deg(self.data.T.pelvisRigid[3]))
         self._ui.doubleSpinBox_pry.setValue(np.rad2deg(self.data.T.pelvisRigid[4]))
         self._ui.doubleSpinBox_prz.setValue(np.rad2deg(self.data.T.pelvisRigid[5]))
+        print(self.data.T.hipRot)
         self._ui.doubleSpinBox_hipx.setValue(np.rad2deg(self.data.T.hipRot[0]))
         self._ui.doubleSpinBox_hipy.setValue(np.rad2deg(self.data.T.hipRot[1]))
         self._ui.doubleSpinBox_hipz.setValue(np.rad2deg(self.data.T.hipRot[2]))
-        self._ui.doubleSpinBox_kneex.setValue(np.rad2deg(self.data.T.kneeRot[0]))
-        self._ui.doubleSpinBox_kneey.setValue(np.rad2deg(self.data.T.kneeRot[1]))
-        self._ui.doubleSpinBox_kneez.setValue(np.rad2deg(self.data.T.kneeRot[2]))
+        print(self.data.T._kneeRot)
+        self._ui.doubleSpinBox_kneex.setValue(np.rad2deg(self.data.T._kneeRot[0]))
+        self._ui.doubleSpinBox_kneey.setValue(np.rad2deg(self.data.T._kneeRot[1]))
+        self._ui.doubleSpinBox_kneez.setValue(np.rad2deg(self.data.T._kneeRot[2]))
 
         # auto reg page
         self._ui.comboBox_regmode.setCurrentIndex(
@@ -233,9 +237,9 @@ class LowerLimbGenerationDialog(QDialog):
         self.data.T.hipRot[0] = np.deg2rad(self._ui.doubleSpinBox_hipx.value())
         self.data.T.hipRot[1] = np.deg2rad(self._ui.doubleSpinBox_hipy.value())
         self.data.T.hipRot[2] = np.deg2rad(self._ui.doubleSpinBox_hipz.value())
-        self.data.T.kneeRot[0] = np.deg2rad(self._ui.doubleSpinBox_kneex.value())
-        self.data.T.kneeRot[1] = np.deg2rad(self._ui.doubleSpinBox_kneey.value())
-        self.data.T.kneeRot[2] = np.deg2rad(self._ui.doubleSpinBox_kneez.value())
+        self.data.T._kneeRot[0] = np.deg2rad(self._ui.doubleSpinBox_kneex.value())
+        self.data.T._kneeRot[1] = np.deg2rad(self._ui.doubleSpinBox_kneey.value())
+        self.data.T._kneeRot[2] = np.deg2rad(self._ui.doubleSpinBox_kneez.value())
 
         # auto reg page
         self.data.registrationMode = str(self._ui.comboBox_regmode.currentText())
@@ -367,18 +371,15 @@ class LowerLimbGenerationDialog(QDialog):
         self.data.kneeCorr = self._ui.checkBox_kneecorr.isChecked()
         self.data.kneeDOF = self._ui.checkBox_kneedof.isChecked()
 
-    def _regUpdate(self, output):
-        # update models in scene
-        self._updateSceneModels()
-
-        # update error field
-        self._ui.lineEdit_landmarkError.setText('{:5.2f}'.format(self.data.landmarkRMSE))
-        self._ui.lineEdit_mDist.setText('{:5.2f}'.format(self.data.fitMDist))
-
-        # unlock reg ui
-        self._regUnlockUI()
-
     def _regLockUI(self):
+        self._ui.comboBox_LASIS.setEnabled(False)
+        self._ui.comboBox_RASIS.setEnabled(False)
+        self._ui.comboBox_Sacral.setEnabled(False)
+        self._ui.comboBox_LEC.setEnabled(False)
+        self._ui.comboBox_MEC.setEnabled(False)
+        self._ui.comboBox_LM.setEnabled(False)
+        self._ui.comboBox_MM.setEnabled(False)
+
         self._ui.doubleSpinBox_pc1.setEnabled(False)
         self._ui.doubleSpinBox_pc2.setEnabled(False)
         self._ui.doubleSpinBox_pc3.setEnabled(False)
@@ -410,6 +411,14 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.pushButton_auto_reg.setEnabled(False)
 
     def _regUnlockUI(self):
+        self._ui.comboBox_LASIS.setEnabled(True)
+        self._ui.comboBox_RASIS.setEnabled(True)
+        self._ui.comboBox_Sacral.setEnabled(True)
+        self._ui.comboBox_LEC.setEnabled(True)
+        self._ui.comboBox_MEC.setEnabled(True)
+        self._ui.comboBox_LM.setEnabled(True)
+        self._ui.comboBox_MM.setEnabled(True)
+
         self._ui.doubleSpinBox_pc1.setEnabled(True)
         self._ui.doubleSpinBox_pc2.setEnabled(True)
         self._ui.doubleSpinBox_pc3.setEnabled(True)
@@ -440,6 +449,20 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.pushButton_auto_abort.setEnabled(True)
         self._ui.pushButton_auto_reg.setEnabled(True)
 
+    def _regUpdate(self, output):
+        # update models in scene
+        self._updateSceneModels()
+
+        # update error field
+        self._ui.lineEdit_landmarkError.setText('{:5.2f}'.format(self.data.landmarkRMSE))
+        self._ui.lineEdit_mDist.setText('{:5.2f}'.format(self.data.fitMDist))
+
+        # unlock reg ui
+        self._regUnlockUI()
+
+        # update configs
+        # self._updateConfigs()
+
     def _autoReg(self):
         self._saveConfigs()
         self._worker.start()
@@ -451,8 +474,8 @@ class LowerLimbGenerationDialog(QDialog):
         self._updateSceneModels()
 
         # clear error fields
-        self._ui.RMSELineEdit.clear()
-        self._ui.pFracLineEdit.clear()
+        self._ui.lineEdit_landmarkError.clear()
+        self._ui.lineEdit_mDist.clear()
 
     def _accept(self):
         self._saveConfigs()

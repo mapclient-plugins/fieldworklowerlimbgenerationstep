@@ -16,7 +16,7 @@ class LLTransformData(object):
     def __init__(self):
         self.pelvisRigid = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         self.hipRot = np.array([0.0, 0.0, 0.0])
-        self.kneeRot = np.array([0.0, 0.0, 0.0])
+        self._kneeRot = np.array([0.0, 0.0, 0.0])
         self.nShapeModes = 1
         self.shapeModes = [0,]
         self._shapeModeWeights = np.zeros(self.SHAPEMODESMAX, dtype=float)
@@ -33,6 +33,21 @@ class LLTransformData(object):
         self._perBoneScalingX = None
 
     @property
+    def kneeRot(self):
+        if self.kneeDOF:
+            return self._kneeRot[[0,2]]
+        else:
+            return self._kneeRot[0]
+
+    @kneeRot.setter
+    def kneeRot(self, value):
+        if self.kneeDOF:
+            self._kneeRot[0] = value[0]
+            self._kneeRot[2] = value[1]
+        else:
+            self._kneeRot[0] = value[0]
+    
+    @property
     def shapeModeWeights(self):
         return self._shapeModeWeights[:self.nShapeModes]
 
@@ -40,17 +55,14 @@ class LLTransformData(object):
     def shapeModeWeights(self, value):
         self._shapeModeWeights[:len(value)] = value
 
+    # gets a flat array, sets using a list of arrays.
     @property
     def shapeModelX(self):
-        if self.kneeDOF:
-            kneeRot = self.kneeRot[[0,2]]
-        else:
-            kneeRot = self.kneeRot[0]
         self._shapeModelX = np.hstack([
                                 self.shapeModeWeights[:self.nShapeModes],
                                 self.pelvisRigid,
                                 self.hipRot,
-                                kneeRot
+                                self.kneeRot
                                 ])
         return self._shapeModelX
 
@@ -58,10 +70,10 @@ class LLTransformData(object):
     def shapeModelX(self, value):
         a = self.nShapeModes
         self._shapeModelX = value
-        self.shapeModeWeights = value
-        self.pelvisRigid = value[a:a+6]
-        self.hipRot = value[a+6:a+9]
-        self.kneeRot = value[a+9:a+12]
+        self.shapeModeWeights = value[0]
+        self.pelvisRigid = value[1]
+        self.hipRot = value[2]
+        self.kneeRot = value[3]
 
     @property
     def uniformScalingX(self):
@@ -132,12 +144,12 @@ class LLStepData(object):
 
     _validRegistrationModes = ('shapemodel', 'uniformscaling', 'perbonescaling', 'manual')
     landmarkNames = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
-                      'femur-MEC', 'femur-LEC', 'tibiafibula-MM',
-                      'tibiafibula-LM',
+                      'femur-LEC', 'femur-MEC', 'tibiafibula-LM',
+                      'tibiafibula-MM',
                       )
     minArgs = {'method':'BFGS',
                  'jac':False,
-                 'bounds':None, 'tol':1e-6,
+                 'bounds':None, 'tol':1e-3,
                  'options':{'eps':1e-5},
                  }
 
@@ -257,6 +269,7 @@ class LLStepData(object):
     def nShapeModes(self, n):
         self.config['pcs_to_fit'] = str(n)
         n = int(n)
+        self.T.nShapeModes = n
         self.T.shapeModes = np.arange(n, dtype=int)
         # if len(self.T.shapeModeWeights)<n:
         #     self.T.shapeModeWeights = np.hstack([
@@ -325,7 +338,8 @@ def _registerShapeModel(lldata):
     lldata.landmarkRMSE = optLandmarkRMSE
     lldata.landmarkErrors = optLandmarkDist
     lldata.fitMDist =  fitInfo['mahalanobis_distance']
-    lldata.shapeModelX = xFitted[-1]
+    lldata.T.shapeModelX = xFitted[-1]
+    print('new X:'+str(lldata.T.shapeModelX))
     return xFitted, optLandmarkDist, optLandmarkRMSE, fitInfo
 
 def _registerUniformScaling(lldata):
