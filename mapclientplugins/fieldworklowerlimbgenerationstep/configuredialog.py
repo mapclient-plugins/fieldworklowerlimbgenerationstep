@@ -86,9 +86,10 @@ class ConfigureDialog(QtGui.QDialog):
         config['pelvis-Sacral'] = self._ui.lineEdit_Sacral.text()
         config['femur-LEC'] = self._ui.lineEdit_LEC.text()
         config['femur-MEC'] = self._ui.lineEdit_MEC.text()
-        config['femur-MEC'] = self._ui.lineEdit_MEC.text()
         config['tibiafibula-LM'] = self._ui.lineEdit_LM.text()
         config['tibiafibula-MM'] = self._ui.lineEdit_MM.text()
+        config['marker_radius'] = self._ui.doubleSpinBox_markerRadius.value()
+        config['skin_pad'] = self._ui.doubleSpinBox_skinPad.value()
         if self._ui.checkBox_kneecorr.isChecked():
             config['knee_corr'] = 'True'
         else:
@@ -123,6 +124,8 @@ class ConfigureDialog(QtGui.QDialog):
         self._ui.lineEdit_MEC.setText(config['femur-MEC'])
         self._ui.lineEdit_MM.setText(config['tibiafibula-MM'])
         self._ui.lineEdit_LM.setText(config['tibiafibula-LM'])
+        self._ui.doubleSpinBox_markerRadius.setValue(float(config['marker_radius']))
+        self._ui.doubleSpinBox_skinPad.setValue(float(config['skin_pad']))
         if config['knee_corr']=='True':
             self._ui.checkBox_kneecorr.setChecked(bool(True))
         else:

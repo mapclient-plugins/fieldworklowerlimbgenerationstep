@@ -159,6 +159,7 @@ class LLStepData(object):
         self.inputLandmarks = None # a dict of landmarks
         self._targetLandmarksNames = None # list of strings matching keys in self.inputLandmarks
         self._targetLandmarks = None
+
         self.inputPCs = None
         self._inputModelDict = None
         self._outputModelDict = None
@@ -202,6 +203,13 @@ class LLStepData(object):
                                   self.T.kneeRot
                                   )
 
+    def _preprocessLandmarks(self, l):
+        return np.array(mocap_landmark_preprocess.preprocess_lower_limb(
+                        self.markerRadius,
+                        self.skinPad,
+                        l[0], l[1], l[2], l[3], l[4], l[5], l[6]),
+                        )
+
     @property
     def outputModelDict(self):
         self._outputModelDict = dict([(m[0], m[1].gf) for m in self.LL.models.items()])
@@ -243,6 +251,7 @@ class LLStepData(object):
     @property
     def targetLandmarks(self):
         self._targetLandmarks = np.array([self.inputLandmarks[n] for n in self._targetLandmarkNames])
+        self._targetLandmarks = self._preprocessLandmarks(self._targetLandmarks)
         return self._targetLandmarks
     
     @property
@@ -265,19 +274,28 @@ class LLStepData(object):
     def nShapeModes(self):
         return int(self.config['pcs_to_fit'])
 
+    @property
+    def markerRadius(self):
+        return float(self.config['marker_radius'])
+
+    @markerRadius.setter
+    def markerRadius(self, value):
+        self.config['marker_radius'] = str(value)
+
+    @property
+    def skinPad(self):
+        return float(self.config['skin_pad'])
+
+    @skinPad.setter
+    def skinPad(self, value):
+        self.config['skin_pad'] = str(value)
+    
     @nShapeModes.setter
     def nShapeModes(self, n):
         self.config['pcs_to_fit'] = str(n)
         n = int(n)
         self.T.nShapeModes = n
         self.T.shapeModes = np.arange(n, dtype=int)
-        # if len(self.T.shapeModeWeights)<n:
-        #     self.T.shapeModeWeights = np.hstack([
-        #                                 self.T.shapeModeWeights,
-        #                                 np.zeros(n-len(self.T.shapeModeWeights))
-        #                                 ])
-        # else:
-        #     self.T.shapeModeWeights = T.shapeModeWeights[:n]
 
     @property
     def kneeCorr(self):

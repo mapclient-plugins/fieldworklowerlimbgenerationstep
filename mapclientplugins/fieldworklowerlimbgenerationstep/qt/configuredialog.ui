@@ -141,14 +141,14 @@
       <item row="10" column="1">
        <widget class="QLineEdit" name="lineEdit_MM"/>
       </item>
-      <item row="11" column="0">
+      <item row="13" column="0">
        <widget class="QLabel" name="label_10">
         <property name="text">
          <string>Knee Options:</string>
         </property>
        </widget>
       </item>
-      <item row="11" column="1">
+      <item row="13" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QCheckBox" name="checkBox_kneedof">
@@ -166,19 +166,39 @@
         </item>
        </layout>
       </item>
-      <item row="12" column="0">
+      <item row="14" column="0">
        <widget class="QLabel" name="label_11">
         <property name="text">
          <string>GUI:</string>
         </property>
        </widget>
       </item>
-      <item row="12" column="1">
+      <item row="14" column="1">
        <widget class="QCheckBox" name="checkBox_GUI">
         <property name="text">
          <string/>
         </property>
        </widget>
+      </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="label_12">
+        <property name="text">
+         <string>Marker Radius:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="0">
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>Skin Padding:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="1">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_markerRadius"/>
+      </item>
+      <item row="12" column="1">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_skinPad"/>
       </item>
      </layout>
     </widget>

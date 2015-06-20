@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'qt/configuredialog.ui'
 #
-# Created: Thu Jun 18 14:27:46 2015
-#      by: pyside-uic 0.2.15 running on PySide 1.2.1
+# Created: Sat Jun 20 22:14:35 2015
+#      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -91,7 +91,7 @@ class Ui_Dialog(object):
         self.formLayout.setWidget(10, QtGui.QFormLayout.FieldRole, self.lineEdit_MM)
         self.label_10 = QtGui.QLabel(self.configGroupBox)
         self.label_10.setObjectName("label_10")
-        self.formLayout.setWidget(11, QtGui.QFormLayout.LabelRole, self.label_10)
+        self.formLayout.setWidget(13, QtGui.QFormLayout.LabelRole, self.label_10)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.checkBox_kneedof = QtGui.QCheckBox(self.configGroupBox)
@@ -100,14 +100,26 @@ class Ui_Dialog(object):
         self.checkBox_kneecorr = QtGui.QCheckBox(self.configGroupBox)
         self.checkBox_kneecorr.setObjectName("checkBox_kneecorr")
         self.horizontalLayout.addWidget(self.checkBox_kneecorr)
-        self.formLayout.setLayout(11, QtGui.QFormLayout.FieldRole, self.horizontalLayout)
+        self.formLayout.setLayout(13, QtGui.QFormLayout.FieldRole, self.horizontalLayout)
         self.label_11 = QtGui.QLabel(self.configGroupBox)
         self.label_11.setObjectName("label_11")
-        self.formLayout.setWidget(12, QtGui.QFormLayout.LabelRole, self.label_11)
+        self.formLayout.setWidget(14, QtGui.QFormLayout.LabelRole, self.label_11)
         self.checkBox_GUI = QtGui.QCheckBox(self.configGroupBox)
         self.checkBox_GUI.setText("")
         self.checkBox_GUI.setObjectName("checkBox_GUI")
-        self.formLayout.setWidget(12, QtGui.QFormLayout.FieldRole, self.checkBox_GUI)
+        self.formLayout.setWidget(14, QtGui.QFormLayout.FieldRole, self.checkBox_GUI)
+        self.label_12 = QtGui.QLabel(self.configGroupBox)
+        self.label_12.setObjectName("label_12")
+        self.formLayout.setWidget(11, QtGui.QFormLayout.LabelRole, self.label_12)
+        self.label_13 = QtGui.QLabel(self.configGroupBox)
+        self.label_13.setObjectName("label_13")
+        self.formLayout.setWidget(12, QtGui.QFormLayout.LabelRole, self.label_13)
+        self.doubleSpinBox_markerRadius = QtGui.QDoubleSpinBox(self.configGroupBox)
+        self.doubleSpinBox_markerRadius.setObjectName("doubleSpinBox_markerRadius")
+        self.formLayout.setWidget(11, QtGui.QFormLayout.FieldRole, self.doubleSpinBox_markerRadius)
+        self.doubleSpinBox_skinPad = QtGui.QDoubleSpinBox(self.configGroupBox)
+        self.doubleSpinBox_skinPad.setObjectName("doubleSpinBox_skinPad")
+        self.formLayout.setWidget(12, QtGui.QFormLayout.FieldRole, self.doubleSpinBox_skinPad)
         self.gridLayout.addWidget(self.configGroupBox, 0, 0, 1, 1)
         self.buttonBox = QtGui.QDialogButtonBox(Dialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -151,4 +163,6 @@ class Ui_Dialog(object):
         self.checkBox_kneedof.setText(QtGui.QApplication.translate("Dialog", "Abd. DOF", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBox_kneecorr.setText(QtGui.QApplication.translate("Dialog", "Abd. Correction", None, QtGui.QApplication.UnicodeUTF8))
         self.label_11.setText(QtGui.QApplication.translate("Dialog", "GUI:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_12.setText(QtGui.QApplication.translate("Dialog", "Marker Radius:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_13.setText(QtGui.QApplication.translate("Dialog", "Skin Padding:", None, QtGui.QApplication.UnicodeUTF8))
 

@@ -53,6 +53,8 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         self._config['mweight'] = '0.1'
         self._config['knee_corr'] = 'False'
         self._config['knee_dof'] = 'False'
+        self._config['marker_radius'] = '5.0'
+        self._config['skin_pad'] = '5.0'
         for l in LLLANDMARKS:
             self._config[l] = ''
 
@@ -68,6 +70,8 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         # Put your execute step code here before calling the '_doneExecution' method.
         self._data.loadData()
         self._data.updateFromConfig()
+        print(1)
+        print self._data.config
         if self._config['GUI']=='True':
             # start gui
             self._widget = LowerLimbGenerationDialog(self._data, self._doneExecution)
@@ -117,6 +121,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         
         if dlg.exec_():
             self._config = dlg.getConfig()
+            self._data.config = self._config
         
         self._configured = dlg.validate()
         self._configuredObserver()
@@ -152,6 +157,8 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         conf.setValue('mweight', self._config['mweight'])
         conf.setValue('knee_corr', self._config['knee_corr'])
         conf.setValue('knee_dof', self._config['knee_dof'])
+        conf.setValue('marker_radius', self._config['marker_radius'])
+        conf.setValue('skin_pad', self._config['skin_pad'])
         conf.setValue('GUI', self._config['GUI'])
         conf.endGroup()
 
@@ -172,6 +179,8 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         self._config['knee_corr'] = conf.value('knee_corr', '')
         self._config['knee_dof'] = conf.value('knee_dof', '')
         self._config['mweight'] = conf.value('mweight', '')
+        self._config['marker_radius'] = conf.value('marker_radius', '')
+        self._config['skin_pad'] = conf.value('skin_pad', '')
         for l in LLLANDMARKS:
             self._config[l] = conf.value(l, '')
         self._config['GUI'] = conf.value('GUI', 'True')

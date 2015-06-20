@@ -74,6 +74,7 @@ class LowerLimbGenerationDialog(QDialog):
 
         self.data = data
         self.doneExecution = doneExecution
+        self._lockManualRegUpdate = False
 
         self.selectedObjectName = None
 
@@ -119,12 +120,13 @@ class LowerLimbGenerationDialog(QDialog):
             self._ui.comboBox_LASIS.addItem(l)
             self._ui.comboBox_RASIS.addItem(l)
             self._ui.comboBox_Sacral.addItem(l)
-            self._ui.comboBox_LEC.addItem(l)
             self._ui.comboBox_MEC.addItem(l)
-            self._ui.comboBox_LM.addItem(l)
+            self._ui.comboBox_LEC.addItem(l)
             self._ui.comboBox_MM.addItem(l)
+            self._ui.comboBox_LM.addItem(l)
 
         # auto reg page
+        self._ui.spinBox_pcsToFit.setMaximum(self.data.T.SHAPEMODESMAX)
         for regmode in self.data.validRegistrationModes:
             self._ui.comboBox_regmode.addItem(regmode)
 
@@ -177,25 +179,28 @@ class LowerLimbGenerationDialog(QDialog):
                     )
                 )
 
+        self._ui.doubleSpinBox_markerRadius.setValue(self.data.markerRadius)
+        self._ui.doubleSpinBox_skinPad.setValue(self.data.skinPad)
+
         # manual reg page
-        print(self.data.T._shapeModeWeights[:self.data.T.nShapeModes])
+        # print(self.data.T._shapeModeWeights[:self.data.T.nShapeModes])
         self._ui.doubleSpinBox_pc1.setValue(self.data.T._shapeModeWeights[0])
         self._ui.doubleSpinBox_pc2.setValue(self.data.T._shapeModeWeights[1])
         self._ui.doubleSpinBox_pc3.setValue(self.data.T._shapeModeWeights[2])
         self._ui.doubleSpinBox_pc4.setValue(self.data.T._shapeModeWeights[3])
         self._ui.doubleSpinBox_scaling.setValue(self.data.T.uniformScaling)
-        print(self.data.T.pelvisRigid)
+        # print(self.data.T.pelvisRigid)
         self._ui.doubleSpinBox_ptx.setValue(self.data.T.pelvisRigid[0])
         self._ui.doubleSpinBox_pty.setValue(self.data.T.pelvisRigid[1])
         self._ui.doubleSpinBox_ptz.setValue(self.data.T.pelvisRigid[2])
         self._ui.doubleSpinBox_prx.setValue(np.rad2deg(self.data.T.pelvisRigid[3]))
         self._ui.doubleSpinBox_pry.setValue(np.rad2deg(self.data.T.pelvisRigid[4]))
         self._ui.doubleSpinBox_prz.setValue(np.rad2deg(self.data.T.pelvisRigid[5]))
-        print(self.data.T.hipRot)
+        # print(self.data.T.hipRot)
         self._ui.doubleSpinBox_hipx.setValue(np.rad2deg(self.data.T.hipRot[0]))
         self._ui.doubleSpinBox_hipy.setValue(np.rad2deg(self.data.T.hipRot[1]))
         self._ui.doubleSpinBox_hipz.setValue(np.rad2deg(self.data.T.hipRot[2]))
-        print(self.data.T._kneeRot)
+        # print(self.data.T._kneeRot)
         self._ui.doubleSpinBox_kneex.setValue(np.rad2deg(self.data.T._kneeRot[0]))
         self._ui.doubleSpinBox_kneey.setValue(np.rad2deg(self.data.T._kneeRot[1]))
         self._ui.doubleSpinBox_kneez.setValue(np.rad2deg(self.data.T._kneeRot[2]))
@@ -221,6 +226,8 @@ class LowerLimbGenerationDialog(QDialog):
                                          str(self._ui.comboBox_LM.currentText()),
                                          str(self._ui.comboBox_MM.currentText()),
                                         )
+        self.data.markerRadius = self._ui.doubleSpinBox_markerRadius.value()
+        self.data.skinPad = self._ui.doubleSpinBox_skinPad.value()
 
         # manual reg page
         self.data.T._shapeModeWeights[0] = self._ui.doubleSpinBox_pc1.value()
@@ -256,23 +263,23 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.screenshotSaveButton.clicked.connect(self._saveScreenShot)
         
         # manual reg
-        self._ui.doubleSpinBox_pc1.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_pc2.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_pc3.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_pc4.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_scaling.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_ptx.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_pty.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_ptz.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_prx.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_pry.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_prz.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_hipx.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_hipy.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_hipz.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_kneex.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_kneey.valueChanged.connect(self._manualRegChanged)
-        self._ui.doubleSpinBox_kneez.valueChanged.connect(self._manualRegChanged)
+        self._ui.doubleSpinBox_pc1.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_pc2.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_pc3.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_pc4.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_scaling.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_ptx.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_pty.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_ptz.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_prx.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_pry.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_prz.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_hipx.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_hipy.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_hipz.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_kneex.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_kneey.valueChanged.connect(self._manualRegUpdate)
+        self._ui.doubleSpinBox_kneez.valueChanged.connect(self._manualRegUpdate)
         self._ui.pushButton_manual_reset.clicked.connect(self._reset)
         self._ui.pushButton_manual_accept.clicked.connect(self._accept)
 
@@ -362,10 +369,11 @@ class LowerLimbGenerationDialog(QDialog):
             meshObj = self._objects.getObject(mn)
             meshObj.updateGeometry(None, self._scene)
 
-    def _manualRegChanged(self):
-        self._saveConfigs()
-        self.data.updateLLModel()
-        self._updateSceneModels()
+    def _manualRegUpdate(self):
+        if not self._lockManualRegUpdate:
+            self._saveConfigs()
+            self.data.updateLLModel()
+            self._updateSceneModels()
 
     def _autoRegChanged(self):
         self.data.kneeCorr = self._ui.checkBox_kneecorr.isChecked()
@@ -375,10 +383,12 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.comboBox_LASIS.setEnabled(False)
         self._ui.comboBox_RASIS.setEnabled(False)
         self._ui.comboBox_Sacral.setEnabled(False)
-        self._ui.comboBox_LEC.setEnabled(False)
         self._ui.comboBox_MEC.setEnabled(False)
-        self._ui.comboBox_LM.setEnabled(False)
+        self._ui.comboBox_LEC.setEnabled(False)
         self._ui.comboBox_MM.setEnabled(False)
+        self._ui.comboBox_LM.setEnabled(False)
+        self._ui.doubleSpinBox_markerRadius.setEnabled(False)
+        self._ui.doubleSpinBox_skinPad.setEnabled(False)
 
         self._ui.doubleSpinBox_pc1.setEnabled(False)
         self._ui.doubleSpinBox_pc2.setEnabled(False)
@@ -418,6 +428,8 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.comboBox_MEC.setEnabled(True)
         self._ui.comboBox_LM.setEnabled(True)
         self._ui.comboBox_MM.setEnabled(True)
+        self._ui.doubleSpinBox_markerRadius.setEnabled(True)
+        self._ui.doubleSpinBox_skinPad.setEnabled(True)
 
         self._ui.doubleSpinBox_pc1.setEnabled(True)
         self._ui.doubleSpinBox_pc2.setEnabled(True)
@@ -461,7 +473,9 @@ class LowerLimbGenerationDialog(QDialog):
         self._regUnlockUI()
 
         # update configs
-        # self._updateConfigs()
+        self._lockManualRegUpdate = True
+        self._updateConfigs()
+        self._lockManualRegUpdate = False
 
     def _autoReg(self):
         self._saveConfigs()
@@ -470,7 +484,9 @@ class LowerLimbGenerationDialog(QDialog):
 
     def _reset(self):
         self.data.resetLL()
+        self._lockManualRegUpdate = True
         self._updateConfigs()
+        self._lockManualRegUpdate = False
         self._updateSceneModels()
 
         # clear error fields
