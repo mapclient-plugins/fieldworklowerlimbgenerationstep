@@ -10,12 +10,20 @@ from gias.musculoskeletal import mocap_landmark_preprocess
 from gias.musculoskeletal.bonemodels import bonemodels
 from gias.musculoskeletal.bonemodels import lowerlimbatlasfit
 
+def _trimAngle(a):
+    if a < -np.pi:
+        return a + 2*np.pi
+    elif a > np.pi:
+        return a - 2*np.pi
+    else:
+        return a
+
 class LLTransformData(object):
     SHAPEMODESMAX = 100
 
     def __init__(self):
-        self.pelvisRigid = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-        self.hipRot = np.array([0.0, 0.0, 0.0])
+        self._pelvisRigid = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        self._hipRot = np.array([0.0, 0.0, 0.0])
         self._kneeRot = np.array([0.0, 0.0, 0.0])
         self.nShapeModes = 1
         self.shapeModes = [0,]
@@ -33,6 +41,32 @@ class LLTransformData(object):
         self._perBoneScalingX = None
 
     @property
+    def pelvisRigid(self):
+        return self._pelvisRigid
+
+    @pelvisRigid.setter
+    def pelvisRigid(self, value):
+        if len(value)!=6:
+            raise ValueError('input pelvisRigid vector not of length 6')
+        else:
+            self._pelvisRigid = np.array([value[0], value[1], value[2],
+                                          _trimAngle(value[3]),
+                                          _trimAngle(value[4]),
+                                          _trimAngle(value[5]),
+                                         ])
+
+    @property
+    def hipRot(self):
+        return self._hipRot
+
+    @hipRot.setter
+    def hipRot(self, value):
+        if len(value)!=3:
+            raise ValueError('input hipRot vector not of length 3')
+        else:
+            self._hipRot = np.array([_trimAngle(v) for v in value])
+
+    @property
     def kneeRot(self):
         if self.kneeDOF:
             return self._kneeRot[[0,2]]
@@ -42,10 +76,10 @@ class LLTransformData(object):
     @kneeRot.setter
     def kneeRot(self, value):
         if self.kneeDOF:
-            self._kneeRot[0] = value[0]
-            self._kneeRot[2] = value[1]
+            self._kneeRot[0] = _trimAngle(value[0])
+            self._kneeRot[2] = _trimAngle(value[1])
         else:
-            self._kneeRot[0] = value[0]
+            self._kneeRot[0] = _trimAngle(value[0])
     
     @property
     def shapeModeWeights(self):
@@ -157,7 +191,7 @@ class LLStepData(object):
         self.config = config
         self.T = LLTransformData()
         self.inputLandmarks = None # a dict of landmarks
-        self._targetLandmarksNames = None # list of strings matching keys in self.inputLandmarks
+        # self._targetLandmarksNames = None # list of strings matching keys in self.inputLandmarks
         self._targetLandmarks = None
 
         self.inputPCs = None
@@ -166,6 +200,8 @@ class LLStepData(object):
         self.landmarkErrors = None
         self.landmarkRMSE = None
         self.fitMDist = None
+
+        # self.regCallback = None
 
     def loadData(self):
         self.LL = bonemodels.LowerLimbLeftAtlas('lower_limb_left')
@@ -237,20 +273,28 @@ class LLStepData(object):
 
     @property
     def targetLandmarkNames(self):
-        return self._targetLandmarkNames
+        # return self._targetLandmarkNames
+        return [self.config[ln] for ln in self.landmarkNames]
 
     @targetLandmarkNames.setter
     def targetLandmarkNames(self, value):
         if len(value)!=7:
             raise ValueError('7 input landmark names required for {}'.format(self._landmarkNames))
         else:
-            self._targetLandmarkNames = value
-            if self.inputLandmarks is not None:
-                self._targetLandmarks = np.array([self.inputLandmarks[n] for n in self._targetLandmarkNames])
+            # self._targetLandmarkNames = value
+            # save to config dict
+            for li, ln in enumerate(self.landmarkNames):
+                self.config[ln] = value[li]
+            # evaluate target landmark coordinates
+            # if (self.inputLandmarks is not None) and ('' not in value):
+            #     self._targetLandmarks = np.array([self.inputLandmarks[n] for n in self._targetLandmarkNames])
 
     @property
     def targetLandmarks(self):
-        self._targetLandmarks = np.array([self.inputLandmarks[n] for n in self._targetLandmarkNames])
+        if '' in self.targetLandmarkNames:
+            raise ValueError('Null string in targetLandmarkNames')
+
+        self._targetLandmarks = np.array([self.inputLandmarks[n] for n in self.targetLandmarkNames])
         self._targetLandmarks = self._preprocessLandmarks(self._targetLandmarks)
         return self._targetLandmarks
     
@@ -325,12 +369,26 @@ class LLStepData(object):
             self.config['knee_dof'] = 'False'
             self.LL.disable_knee_adduction_dof()
 
-    def register(self):
+    def register(self, callbackSignal=None):
         self.updateFromConfig()
         mode = self.config['registration_mode']
+
+        if self.targetLandmarks is None:
+            raise RuntimeError('Target Landmarks not set')
+
+        if callbackSignal is not None:
+            def callback(output):
+                callbackSignal.emit(output)
+        else:
+            callback=None
+
         if mode=='shapemodel':
             print(self.T.shapeModelX)
-            output = _registerShapeModel(self)
+            if self.T.shapeModes is None:
+                raise RuntimeError('Number of pcs to fit not defined')
+            if self.mWeight is None:
+                raise RuntimeError('Mahalanobis penalty weight not defined')
+            output = _registerShapeModel(self, callback)
         elif mode=='uniformscale':
             print(self.T.uniformScalingX)
             output = _registerUniformScaling(self)
@@ -339,7 +397,7 @@ class LLStepData(object):
             output = _registerPerBoneScaling(self)
         return output
 
-def _registerShapeModel(lldata):
+def _registerShapeModel(lldata, callback=None):
     # do the fit
     xFitted,\
     optLandmarkDist,\
@@ -352,6 +410,7 @@ def _registerShapeModel(lldata):
                     lldata.mWeight,
                     x0=lldata.T.shapeModelX,
                     minimise_args=lldata.minArgs,
+                    callback=callback,
                     )
     lldata.landmarkRMSE = optLandmarkRMSE
     lldata.landmarkErrors = optLandmarkDist

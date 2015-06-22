@@ -41,12 +41,16 @@ import copy
 
 class _ExecThread(QThread):
     update = Signal(tuple)
+    callback = Signal(tuple)
 
     def __init__(self, func):
         QThread.__init__(self)
         self.func = func
 
     def run(self):
+        # NOT USING CALLBACK since (probably due to threading) not all 
+        # bone models update in synchrony
+        # output = self.func(self.callback)
         output = self.func()
         self.update.emit(output)
 
@@ -73,6 +77,7 @@ class LowerLimbGenerationDialog(QDialog):
         self._scene.background = self.backgroundColour
 
         self.data = data
+        self.data.regCallback = self._regCallback
         self.doneExecution = doneExecution
         self._lockManualRegUpdate = False
 
@@ -80,6 +85,7 @@ class LowerLimbGenerationDialog(QDialog):
 
         self._worker = _ExecThread(self.data.register)
         self._worker.update.connect(self._regUpdate)
+        self._worker.callback.connect(self._regCallback)
 
         # print 'init...', self._config
 
@@ -235,18 +241,23 @@ class LowerLimbGenerationDialog(QDialog):
         self.data.T._shapeModeWeights[2] = self._ui.doubleSpinBox_pc3.value()
         self.data.T._shapeModeWeights[3] = self._ui.doubleSpinBox_pc4.value()
         self.data.T.uniformScaling = self._ui.doubleSpinBox_scaling.value()
-        self.data.T.pelvisRigid[0] = self._ui.doubleSpinBox_ptx.value()
-        self.data.T.pelvisRigid[1] = self._ui.doubleSpinBox_pty.value()
-        self.data.T.pelvisRigid[2] = self._ui.doubleSpinBox_ptz.value()
-        self.data.T.pelvisRigid[3] = np.deg2rad(self._ui.doubleSpinBox_prx.value())
-        self.data.T.pelvisRigid[4] = np.deg2rad(self._ui.doubleSpinBox_pry.value())
-        self.data.T.pelvisRigid[5] = np.deg2rad(self._ui.doubleSpinBox_prz.value())
-        self.data.T.hipRot[0] = np.deg2rad(self._ui.doubleSpinBox_hipx.value())
-        self.data.T.hipRot[1] = np.deg2rad(self._ui.doubleSpinBox_hipy.value())
-        self.data.T.hipRot[2] = np.deg2rad(self._ui.doubleSpinBox_hipz.value())
-        self.data.T._kneeRot[0] = np.deg2rad(self._ui.doubleSpinBox_kneex.value())
-        self.data.T._kneeRot[1] = np.deg2rad(self._ui.doubleSpinBox_kneey.value())
-        self.data.T._kneeRot[2] = np.deg2rad(self._ui.doubleSpinBox_kneez.value())
+        self.data.T.pelvisRigid = [self._ui.doubleSpinBox_ptx.value(),
+                                   self._ui.doubleSpinBox_pty.value(),
+                                   self._ui.doubleSpinBox_ptz.value(),
+                                   np.deg2rad(self._ui.doubleSpinBox_prx.value()),
+                                   np.deg2rad(self._ui.doubleSpinBox_pry.value()),
+                                   np.deg2rad(self._ui.doubleSpinBox_prz.value()),
+                                   ]
+        self.data.T.hipRot = [np.deg2rad(self._ui.doubleSpinBox_hipx.value()),
+                              np.deg2rad(self._ui.doubleSpinBox_hipy.value()),
+                              np.deg2rad(self._ui.doubleSpinBox_hipz.value()),
+                              ]
+        if self.data.kneeDOF:
+            self.data.T.kneeRot = [np.deg2rad(self._ui.doubleSpinBox_kneex.value()),
+                                   np.deg2rad(self._ui.doubleSpinBox_kneez.value()),
+                                   ]
+        else:
+            self.data.T.kneeRot = [np.deg2rad(self._ui.doubleSpinBox_kneex.value()),]
 
         # auto reg page
         self.data.registrationMode = str(self._ui.comboBox_regmode.currentText())
@@ -476,6 +487,9 @@ class LowerLimbGenerationDialog(QDialog):
         self._lockManualRegUpdate = True
         self._updateConfigs()
         self._lockManualRegUpdate = False
+
+    def _regCallback(self, output):
+        self._updateSceneModels()
 
     def _autoReg(self):
         self._saveConfigs()
