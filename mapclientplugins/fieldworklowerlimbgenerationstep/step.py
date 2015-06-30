@@ -101,9 +101,9 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         provides port for this step then the index can be ignored.
         '''
         if index == 3:
-            return self._data.outputModelDict()
+            return self._data.outputModelDict
         else:
-            return self._data.outputTransform()
+            return self._data.outputTransform
 
     def configure(self):
         '''
