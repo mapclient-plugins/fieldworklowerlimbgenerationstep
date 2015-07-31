@@ -71,7 +71,7 @@ class LLTransformData(object):
         if self.kneeDOF:
             return self._kneeRot[[0,2]]
         else:
-            return self._kneeRot[0]
+            return self._kneeRot[[0]]
 
     @kneeRot.setter
     def kneeRot(self, value):
