@@ -154,6 +154,13 @@ class LLTransformData(object):
         self.kneeRot = value[a+9:a+12]
 
 SELF_DIRECTORY = os.path.split(__file__)[0]
+PELVIS_SUBMESHES = ('RH', 'LH', 'sac')
+PELVIS_SUBMESH_ELEMS = {'RH': range(0, 73),
+                        'LH': range(73,146),
+                        'sac': range(146, 260),
+                        }
+PELVIS_BASISTYPES = {'tri10':'simplex_L3_L3','quad44':'quad_L3_L3'}
+
     
 class LLStepData(object):
 
@@ -249,7 +256,36 @@ class LLStepData(object):
     @property
     def outputModelDict(self):
         self._outputModelDict = dict([(m[0], m[1].gf) for m in self.LL.models.items()])
+
+        # add pelvis submeshes
+        
+        self._outputModelDict['pelvis flat'] = copy.deepcopy(self._outputModelDict['pelvis'])
+        self._outputModelDict['pelvis'] = self._createNestedPelvis(self._outputModelDict['pelvis flat'])
+
         return self._outputModelDict
+
+    def _createNestedPelvis(self, gf):
+        """ Given a flattened pelvis model, create a hierarchical model
+        """
+        newgf = geometric_field.geometric_field(
+                    gf.name, 3,
+                    field_dimensions=2,
+                    field_basis=PELVIS_BASISTYPES
+                    )
+
+        for subname in PELVIS_SUBMESHES:
+            subgf = gf.makeGFFromElements(
+                        subname,
+                        PELVIS_SUBMESH_ELEMS[subname],
+                        PELVIS_BASISTYPES
+                        )
+            newgf.add_element_with_parameters(
+                subgf.ensemble_field_function,
+                subgf.field_parameters,
+                tol=0.0
+                )
+
+        return newgf
 
     @property
     def outputTransform(self):
