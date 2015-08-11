@@ -136,6 +136,9 @@ class LowerLimbGenerationDialog(QDialog):
         for regmode in self.data.validRegistrationModes:
             self._ui.comboBox_regmode.addItem(regmode)
 
+        # disable manual scaling adjustment, just use the shape model
+        self._ui.doubleSpinBox_scaling.setEnabled(False)
+
         self._updateConfigs()
 
     def _updateConfigs(self):
@@ -405,7 +408,7 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.doubleSpinBox_pc2.setEnabled(False)
         self._ui.doubleSpinBox_pc3.setEnabled(False)
         self._ui.doubleSpinBox_pc4.setEnabled(False)
-        self._ui.doubleSpinBox_scaling.setEnabled(False)
+        # self._ui.doubleSpinBox_scaling.setEnabled(False)
         self._ui.doubleSpinBox_ptx.setEnabled(False)
         self._ui.doubleSpinBox_pty.setEnabled(False)
         self._ui.doubleSpinBox_ptz.setEnabled(False)
@@ -446,7 +449,7 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.doubleSpinBox_pc2.setEnabled(True)
         self._ui.doubleSpinBox_pc3.setEnabled(True)
         self._ui.doubleSpinBox_pc4.setEnabled(True)
-        self._ui.doubleSpinBox_scaling.setEnabled(True)
+        # self._ui.doubleSpinBox_scaling.setEnabled(True)
         self._ui.doubleSpinBox_ptx.setEnabled(True)
         self._ui.doubleSpinBox_pty.setEnabled(True)
         self._ui.doubleSpinBox_ptz.setEnabled(True)

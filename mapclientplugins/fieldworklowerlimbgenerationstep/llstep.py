@@ -9,6 +9,7 @@ from fieldwork.field import geometric_field
 from gias.musculoskeletal import mocap_landmark_preprocess
 from gias.musculoskeletal.bonemodels import bonemodels
 from gias.musculoskeletal.bonemodels import lowerlimbatlasfit
+from gias.musculoskeletal.bonemodels import lowerlimbatlasfitscaling
 
 def _trimAngle(a):
     if a < -np.pi:
@@ -123,10 +124,16 @@ class LLTransformData(object):
     def uniformScalingX(self, value):
         a = 1
         self._uniformScalingX = value
-        self.shapeModeWeights = value[:a]
+        self.uniformScaling = value[0]
         self.pelvisRigid = value[a:a+6]
         self.hipRot = value[a+6:a+9]
         self.kneeRot = value[a+9:a+12]
+
+        # propagate isotropic scaling to each bone
+        self.pelvisScaling = self._uniformScaling
+        self.femurScaling = self._uniformScaling
+        self.patellaScaling = self._uniformScaling
+        self.tibfibScaling = self._uniformScaling
 
     @property
     def perBoneScalingX(self):
@@ -183,7 +190,7 @@ class LLStepData(object):
                                            ),
                             }
 
-    _validRegistrationModes = ('shapemodel', 'uniformscaling', 'perbonescaling', 'manual')
+    _validRegistrationModes = ('shapemodel', 'uniformscaling', 'perbonescaling')
     landmarkNames = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
                       'femur-LEC', 'femur-MEC', 'tibiafibula-LM',
                       'tibiafibula-MM',
@@ -425,7 +432,7 @@ class LLStepData(object):
             if self.mWeight is None:
                 raise RuntimeError('Mahalanobis penalty weight not defined')
             output = _registerShapeModel(self, callback)
-        elif mode=='uniformscale':
+        elif mode=='uniformscaling':
             print(self.T.uniformScalingX)
             output = _registerUniformScaling(self)
         elif mode=='perbonescaling':
@@ -455,8 +462,44 @@ def _registerShapeModel(lldata, callback=None):
     print('new X:'+str(lldata.T.shapeModelX))
     return xFitted, optLandmarkDist, optLandmarkRMSE, fitInfo
 
-def _registerUniformScaling(lldata):
-    raise NotImplementedError
+def _registerUniformScaling(lldata, callback=None):
+    # do the fit
+    xFitted,\
+    optLandmarkDist,\
+    optLandmarkRMSE,\
+    fitInfo = lowerlimbatlasfitscaling.fit(
+                    lldata.LL,
+                    lldata.targetLandmarks,
+                    lldata.landmarkNames,
+                    bones_to_scale='uniform',
+                    x0=lldata.T.uniformScalingX,
+                    minimise_args=lldata.minArgs,
+                    # callback=callback,
+                    )
+    lldata.landmarkRMSE = optLandmarkRMSE
+    lldata.landmarkErrors = optLandmarkDist
+    lldata.fitMDist = -1.0
+    lldata.T.uniformScalingX = xFitted[-1]
+    print('new X:'+str(lldata.T.uniformScalingX))
+    return xFitted, optLandmarkDist, optLandmarkRMSE, fitInfo
 
-def _registerPerBoneScaling(lldata):
-    raise NotImplementedError
+def _registerPerBoneScaling(lldata, callback=None):
+    bones = ('pelvis', 'femur', 'patella', 'tibiafibula')
+    xFitted,\
+    optLandmarkDist,\
+    optLandmarkRMSE,\
+    fitInfo = lowerlimbatlasfitscaling.fit(
+                    lldata.LL,
+                    lldata.targetLandmarks,
+                    lldata.landmarkNames,
+                    bones_to_scale=bones,
+                    x0=lldata.T.perBoneScalingX,
+                    minimise_args=lldata.minArgs,
+                    # callback=callback,
+                    )
+    lldata.landmarkRMSE = optLandmarkRMSE
+    lldata.landmarkErrors = optLandmarkDist
+    lldata.fitMDist = -1.0
+    lldata.T.perBoneScalingX = xFitted[-1]
+    print('new X:'+str(lldata.T.perBoneScalingX))
+    return xFitted, optLandmarkDist, optLandmarkRMSE, fitInfo
