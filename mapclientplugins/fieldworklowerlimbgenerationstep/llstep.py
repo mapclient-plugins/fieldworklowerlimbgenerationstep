@@ -36,6 +36,7 @@ class LLTransformData(object):
         self.tibfibScaling = 1.0
         self.kneeDOF = False
         self.kneeCorr = False
+        self.lastTransformSet = None
 
         self._shapeModelX = None
         self._uniformScalingX = None
@@ -109,6 +110,7 @@ class LLTransformData(object):
         self.pelvisRigid = value[1]
         self.hipRot = value[2]
         self.kneeRot = value[3]
+        self.lastTransformSet = self.shapeModelX
 
     @property
     def uniformScalingX(self):
@@ -122,18 +124,21 @@ class LLTransformData(object):
 
     @uniformScalingX.setter
     def uniformScalingX(self, value):
+        print value
         a = 1
         self._uniformScalingX = value
         self.uniformScaling = value[0]
-        self.pelvisRigid = value[a:a+6]
-        self.hipRot = value[a+6:a+9]
-        self.kneeRot = value[a+9:a+12]
+        self.pelvisRigid = value[1]
+        self.hipRot = value[2]
+        self.kneeRot = value[3]
 
         # propagate isotropic scaling to each bone
-        self.pelvisScaling = self._uniformScaling
-        self.femurScaling = self._uniformScaling
-        self.patellaScaling = self._uniformScaling
-        self.tibfibScaling = self._uniformScaling
+        self.pelvisScaling = self.uniformScaling
+        self.femurScaling = self.uniformScaling
+        self.patellaScaling = self.uniformScaling
+        self.tibfibScaling = self.uniformScaling
+
+        self.lastTransformSet = self.uniformScalingX
 
     @property
     def perBoneScalingX(self):
@@ -152,13 +157,14 @@ class LLTransformData(object):
     def perBoneScalingX(self, value):
         a = 4
         self._perBoneScalingX = value
-        self.pelvisScaling = value[0]
-        self.femurScaling = value[1]
-        self.patellaScaling = value[2]
-        self.tibfibScaling = value[3]
-        self.pelvisRigid = value[a:a+6]
-        self.hipRot = value[a+6:a+9]
-        self.kneeRot = value[a+9:a+12]
+        self.pelvisScaling = value[0][1][0]
+        self.femurScaling = value[0][1][1]
+        self.patellaScaling = value[0][1][2]
+        self.tibfibScaling = value[0][1][3]
+        self.pelvisRigid = value[1]
+        self.hipRot = value[2]
+        self.kneeRot = value[3]
+        self.lastTransformSet = self.perBoneScalingX
 
 SELF_DIRECTORY = os.path.split(__file__)[0]
 PELVIS_SUBMESHES = ('RH', 'LH', 'sac')
@@ -195,9 +201,9 @@ class LLStepData(object):
                       'femur-LEC', 'femur-MEC', 'tibiafibula-LM',
                       'tibiafibula-MM',
                       )
-    minArgs = {'method':'BFGS',
+    minArgs = {'method':'L-BFGS-B',
                  'jac':False,
-                 'bounds':None, 'tol':1e-3,
+                 'bounds':None, 'tol':1e-6,
                  'options':{'eps':1e-5},
                  }
 
@@ -426,21 +432,28 @@ class LLStepData(object):
             callback=None
 
         if mode=='shapemodel':
-            print(self.T.shapeModelX)
             if self.T.shapeModes is None:
                 raise RuntimeError('Number of pcs to fit not defined')
             if self.mWeight is None:
                 raise RuntimeError('Mahalanobis penalty weight not defined')
             output = _registerShapeModel(self, callback)
         elif mode=='uniformscaling':
-            print(self.T.uniformScalingX)
             output = _registerUniformScaling(self)
         elif mode=='perbonescaling':
-            print(self.T.perBoneScalingX)
             output = _registerPerBoneScaling(self)
         return output
 
 def _registerShapeModel(lldata, callback=None):
+
+    # if lladata.T.shapeModelX has not changed from the default,
+    # use None for x0 so that it is automatically calculated
+    x0Temp = lldata.T.shapeModelX
+    if np.all(x0Temp==0.0):
+        x0 = None
+    else:
+        x0 = x0Temp
+    print(x0)
+
     # do the fit
     xFitted,\
     optLandmarkDist,\
@@ -451,7 +464,7 @@ def _registerShapeModel(lldata, callback=None):
                     lldata.landmarkNames,
                     lldata.T.shapeModes,
                     lldata.mWeight,
-                    x0=lldata.T.shapeModelX,
+                    x0=x0,
                     minimise_args=lldata.minArgs,
                     callback=callback,
                     )
@@ -463,6 +476,16 @@ def _registerShapeModel(lldata, callback=None):
     return xFitted, optLandmarkDist, optLandmarkRMSE, fitInfo
 
 def _registerUniformScaling(lldata, callback=None):
+    
+    # if lladata.T.uniformScalingX has not changed from the default,
+    # use None for x0 so that it is automatically calculated
+    x0Temp = lldata.T.uniformScalingX
+    if (x0Temp[0]==1.0) and np.all(x0Temp[1:]==0.0):
+        x0 = None
+    else:
+        x0 = x0Temp
+    print(x0)
+
     # do the fit
     xFitted,\
     optLandmarkDist,\
@@ -472,7 +495,7 @@ def _registerUniformScaling(lldata, callback=None):
                     lldata.targetLandmarks,
                     lldata.landmarkNames,
                     bones_to_scale='uniform',
-                    x0=lldata.T.uniformScalingX,
+                    x0=x0,
                     minimise_args=lldata.minArgs,
                     # callback=callback,
                     )
@@ -484,6 +507,15 @@ def _registerUniformScaling(lldata, callback=None):
     return xFitted, optLandmarkDist, optLandmarkRMSE, fitInfo
 
 def _registerPerBoneScaling(lldata, callback=None):
+    
+    # if lladata.T.perboneScalingX has not changed from the default,
+    # use None for x0 so that it is automatically calculated
+    x0Temp = lldata.T.perBoneScalingX
+    if np.all(x0Temp[:4]==1.0) and np.all(x0Temp[4:]==0.0):
+        x0 = None
+    else:
+        x0 = x0Temp
+    print(x0)
     bones = ('pelvis', 'femur', 'patella', 'tibiafibula')
     xFitted,\
     optLandmarkDist,\
@@ -493,7 +525,7 @@ def _registerPerBoneScaling(lldata, callback=None):
                     lldata.targetLandmarks,
                     lldata.landmarkNames,
                     bones_to_scale=bones,
-                    x0=lldata.T.perBoneScalingX,
+                    x0=x0,
                     minimise_args=lldata.minArgs,
                     # callback=callback,
                     )
