@@ -174,6 +174,11 @@ PELVIS_SUBMESH_ELEMS = {'RH': range(0, 73),
                         }
 PELVIS_BASISTYPES = {'tri10':'simplex_L3_L3','quad44':'quad_L3_L3'}
 
+TIBFIB_SUBMESHES = ('tibia', 'fibula')
+TIBFIB_SUBMESH_ELEMS = {'tibia': range(0, 46),
+                        'fibula': range(46,88),
+                        }
+TIBFIB_BASISTYPES = {'tri10':'simplex_L3_L3','quad44':'quad_L3_L3'}
     
 class LLStepData(object):
 
@@ -294,11 +299,30 @@ class LLStepData(object):
         self._outputModelDict = dict([(m[0], m[1].gf) for m in self.LL.models.items()])
 
         # add pelvis submeshes
-        
         self._outputModelDict['pelvis flat'] = copy.deepcopy(self._outputModelDict['pelvis'])
         self._outputModelDict['pelvis'] = self._createNestedPelvis(self._outputModelDict['pelvis flat'])
 
+        # add seperate tibia and fibula
+        tibia_gf, fibula_gf = self._splitTibiaFibulaGFs()
+        self._outputModelDict['tibia'] = tibia_gf
+        self._outputModelDict['fibula'] = fibula_gf
+
         return self._outputModelDict
+
+    def _splitTibiaFibulaGFs(self):
+        tibfib = self.LL.models['tibiafibula'].gf
+        tib = tibfib.makeGFFromElements(
+                'tibia',
+                TIBFIB_SUBMESH_ELEMS['tibia'],
+                TIBFIB_BASISTYPES,
+                )
+        fib = tibfib.makeGFFromElements(
+                'fibula',
+                TIBFIB_SUBMESH_ELEMS['fibula'],
+                TIBFIB_BASISTYPES,
+                )
+
+        return tib, fib
 
     def _createNestedPelvis(self, gf):
         """ Given a flattened pelvis model, create a hierarchical model
