@@ -1,10 +1,11 @@
 fieldworklowerlimbgenerationstep
 ================================
-MAP Client plugin for generating left lower limb geometry either manually or by fitting to
-anatomical landmarks.
+MAP Client plugin for generating left or right lower limb geometry.
 
-Currently, only shape model fitting has been implemented. Uniform or per-bone scaling
-will be implemented in the future.
+The lower limb model contains the pelvis, femur, patella, tibia, and fibula.
+Either the left or the right side can be fitted to mocap landmarks using
+a statistical shape model, uniform isotropic scaling, or per-bone isotropic 
+scaling.
 
 Requires:
 GIAS: https://bitbucket.org/jangle/gias,
