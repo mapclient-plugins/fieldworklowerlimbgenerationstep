@@ -171,8 +171,26 @@ PELVIS_BASISTYPES = {'tri10':'simplex_L3_L3','quad44':'quad_L3_L3'}
     
 class LLStepData(object):
 
-    _shapeModelFilename = os.path.join(SELF_DIRECTORY, 'data/shape_models/LLP26_rigid.pc')
-    _boneModelFilenames = {'pelvis': (os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/pelvis_combined_cubic_mean_rigid_LLP26.geof'),
+    _shapeModelFilenameRight = os.path.join(SELF_DIRECTORY, 'data/shape_models/LLP26_right_mirrored_from_left_rigid.pc')
+    _boneModelFilenamesRight = {'pelvis': (os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/pelvis_combined_cubic_mean_rigid_LLP26.geof'),
+                                      os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/pelvis_combined_cubic_flat.ens'),
+                                      os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/pelvis_combined_cubic_flat.mesh'),
+                                      ),
+                           'femur': (os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/femur_right_mirrored_from_left_mean_rigid_LLP26.geof'),
+                                     os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/femur_right_quartic_flat.ens'),
+                                     os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/femur_right_quartic_flat.mesh'),
+                                     ),
+                           'patella': (os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/patella_right_mirrored_from_left_mean_rigid_LLP26.geof'),
+                                       os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/patella_11_right.ens'),
+                                       os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/patella_11_right.mesh'),
+                                       ),
+                           'tibiafibula': (os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/tibia_fibula_cubic_right_mirrored_from_left_mean_rigid_LLP26.geof'),
+                                           os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/tibia_fibula_right_cubic_flat.ens'),
+                                           os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/tibia_fibula_right_cubic_flat.mesh'),
+                                           ),
+                            }
+    _shapeModelFilenameRight = os.path.join(SELF_DIRECTORY, 'data/shape_models/LLP26_rigid.pc')
+    _boneModelFilenamesRight = {'pelvis': (os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/pelvis_combined_cubic_mean_rigid_LLP26.geof'),
                                       os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/pelvis_combined_cubic_flat.ens'),
                                       os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/pelvis_combined_cubic_flat.mesh'),
                                       ),
@@ -189,7 +207,6 @@ class LLStepData(object):
                                            os.path.join(SELF_DIRECTORY, 'data/atlas_meshes/tibia_fibula_left_cubic_flat.mesh'),
                                            ),
                             }
-
     _validRegistrationModes = ('shapemodel', 'uniformscaling', 'perbonescaling')
     landmarkNames = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
                       'femur-LEC', 'femur-MEC', 'tibiafibula-LM',
@@ -218,9 +235,15 @@ class LLStepData(object):
         # self.regCallback = None
 
     def loadData(self):
-        self.LL = bonemodels.LowerLimbLeftAtlas('lower_limb_left')
-        self.LL.bone_files = self._boneModelFilenames
-        self.LL.combined_pcs_filename = self._shapeModelFilename
+        if self.config['side']=='left':
+            self.LL = bonemodels.LowerLimbLeftAtlas('lower_limb_left')
+            self.LL.bone_files = self._boneModelFilenamesLeft
+            self.LL.combined_pcs_filename = self._shapeModelFilenameLeft
+        elif self.config['side']=='right':
+            self.LL = bonemodels.LowerLimbRightAtlas('lower_limb_right')
+            self.LL.bone_files = self._boneModelFilenamesRight
+            self.LL.combined_pcs_filename = self._shapeModelFilenameRight
+
         self.LL.load_bones()
 
     def resetLL(self):
