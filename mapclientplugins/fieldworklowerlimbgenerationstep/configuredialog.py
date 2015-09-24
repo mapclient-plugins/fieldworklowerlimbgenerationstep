@@ -7,6 +7,7 @@ INVALID_STYLE_SHEET = 'background-color: rgba(239, 0, 0, 50)'
 DEFAULT_STYLE_SHEET = ''
 
 REG_MODES = ('shapemodel', 'uniformscaling', 'perbonescaling', 'manual')
+SIDEOPTIONS = ('left', 'right')
 
 class ConfigureDialog(QtGui.QDialog):
     '''
@@ -34,6 +35,9 @@ class ConfigureDialog(QtGui.QDialog):
 
         for regmode in REG_MODES:
             self._ui.comboBox_regmode.addItem(regmode)
+
+        for side in SIDEOPTIONS:
+            self._ui.comboBox_side.addItem(side)
 
     def _makeConnections(self):
         self._ui.lineEdit_id.textChanged.connect(self.validate)
@@ -79,6 +83,7 @@ class ConfigureDialog(QtGui.QDialog):
         config = {}
         config['identifier'] = self._ui.lineEdit_id.text()
         config['registration_mode'] = self._ui.comboBox_regmode.currentText()
+        config['side'] = self._ui.comboBox_side.currentText()
         config['pcs_to_fit'] = str(self._ui.spinBox_pcsToFit.value())
         config['mweight'] = str(self._ui.doubleSpinBox_mWeight.value())
         config['pelvis-RASIS'] = self._ui.lineEdit_RASIS.text()
@@ -115,6 +120,13 @@ class ConfigureDialog(QtGui.QDialog):
         self._ui.comboBox_regmode.setCurrentIndex(
             REG_MODES.index(config['registration_mode'])
             )
+        if config.get('side'):
+            self._ui.comboBox_side.setCurrentIndex(
+                SIDEOPTIONS.index(config['side'])
+                )
+        else:
+            self._ui.comboBox_side.setCurrentIndex(0)
+
         self._ui.spinBox_pcsToFit.setValue(int(config['pcs_to_fit']))
         self._ui.doubleSpinBox_mWeight.setValue(float(config['mweight']))
         self._ui.lineEdit_RASIS.setText(config['pelvis-RASIS'])

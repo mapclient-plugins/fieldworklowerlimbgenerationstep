@@ -55,11 +55,11 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         self._config['knee_dof'] = 'False'
         self._config['marker_radius'] = '5.0'
         self._config['skin_pad'] = '5.0'
+        self._config['side'] = 'left'
         for l in LLLANDMARKS:
             self._config[l] = ''
 
         self._data = llstep.LLStepData(self._config)
-
 
     def execute(self):
         '''
@@ -70,7 +70,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         # Put your execute step code here before calling the '_doneExecution' method.
         self._data.loadData()
         self._data.updateFromConfig()
-        print(1)
+        print('LL estimation configs:')
         print self._data.config
         if self._config['GUI']=='True':
             # start gui
@@ -160,6 +160,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         conf.setValue('marker_radius', self._config['marker_radius'])
         conf.setValue('skin_pad', self._config['skin_pad'])
         conf.setValue('GUI', self._config['GUI'])
+        conf.setValue('side', self._config['side'])
         conf.endGroup()
 
 
@@ -181,6 +182,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         self._config['mweight'] = conf.value('mweight', '')
         self._config['marker_radius'] = conf.value('marker_radius', '')
         self._config['skin_pad'] = conf.value('skin_pad', '')
+        self._config['side'] = conf.value('side', '')
         for l in LLLANDMARKS:
             self._config[l] = conf.value(l, '')
         self._config['GUI'] = conf.value('GUI', 'True')
