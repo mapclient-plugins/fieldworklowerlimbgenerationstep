@@ -7,7 +7,7 @@ INVALID_STYLE_SHEET = 'background-color: rgba(239, 0, 0, 50)'
 DEFAULT_STYLE_SHEET = ''
 
 REG_MODES = ('shapemodel', 'uniformscaling', 'perbonescaling', 'manual')
-SIDEOPTIONS = ('left', 'right', 'both')
+SIDEOPTIONS = ('left', 'right')
 
 class ConfigureDialog(QtGui.QDialog):
     '''
@@ -126,7 +126,7 @@ class ConfigureDialog(QtGui.QDialog):
                 )
         else:
             self._ui.comboBox_side.setCurrentIndex(0)
-            
+
         self._ui.spinBox_pcsToFit.setValue(int(config['pcs_to_fit']))
         self._ui.doubleSpinBox_mWeight.setValue(float(config['mweight']))
         self._ui.lineEdit_RASIS.setText(config['pelvis-RASIS'])
