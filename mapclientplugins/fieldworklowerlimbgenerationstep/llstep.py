@@ -300,7 +300,11 @@ class LLStepData(object):
 
         # add pelvis submeshes
         self._outputModelDict['pelvis flat'] = copy.deepcopy(self._outputModelDict['pelvis'])
-        self._outputModelDict['pelvis'] = self._createNestedPelvis(self._outputModelDict['pelvis flat'])
+        lh_gf, sac_gf, rh_gf = self._splitPelvisGFs()
+        self._outputModelDict['hemipelvis-left'] = lh_gf
+        self._outputModelDict['sacrum'] = sac_gf
+        self._outputModelDict['hemipelvis-right'] = rh_gf
+        # self._outputModelDict['pelvis'] = self._createNestedPelvis(self._outputModelDict['pelvis flat'])
 
         # add seperate tibia and fibula
         tibia_gf, fibula_gf = self._splitTibiaFibulaGFs()
@@ -323,6 +327,28 @@ class LLStepData(object):
                 )
 
         return tib, fib
+
+    def _splitPelvisGFs(self):
+        """ Given a flattened pelvis model, create left hemi, sacrum,
+        and right hemi meshes
+        """
+        gf = self.LL.models['pelvis'].gf
+        lhgf = gf.makeGFFromElements(
+                    'hemipelvis-left',
+                    PELVIS_SUBMESH_ELEMS['LH'],
+                    PELVIS_BASISTYPES
+                    )
+        sacgf = gf.makeGFFromElements(
+                    'sacrum',
+                    PELVIS_SUBMESH_ELEMS['sac'],
+                    PELVIS_BASISTYPES
+                    )
+        rhgf = gf.makeGFFromElements(
+                    'hemipelvis-right',
+                    PELVIS_SUBMESH_ELEMS['RH'],
+                    PELVIS_BASISTYPES
+                    )
+        return lhgf, sacgf, rhgf
 
     def _createNestedPelvis(self, gf):
         """ Given a flattened pelvis model, create a hierarchical model
