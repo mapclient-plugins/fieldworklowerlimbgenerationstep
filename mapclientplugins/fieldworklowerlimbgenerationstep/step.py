@@ -3,9 +3,9 @@
 MAP Client Plugin Step
 '''
 import os
+import json
 
 from PySide import QtGui
-from PySide import QtCore
 
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclientplugins.fieldworklowerlimbgenerationstep.configuredialog import ConfigureDialog
@@ -138,55 +138,19 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         '''
         self._config['identifier'] = identifier
 
-    def serialize(self, location):
+    def serialize(self):
         '''
-        Add code to serialize this step to disk.  The filename should
-        use the step identifier (received from getIdentifier()) to keep it
-        unique within the workflow.  The suggested name for the file on
-        disk is:
-            filename = getIdentifier() + '.conf'
+        Add code to serialize this step to disk. Returns a json string for
+        mapclient to serialise.
         '''
-        configuration_file = os.path.join(location, self.getIdentifier() + '.conf')
-        conf = QtCore.QSettings(configuration_file, QtCore.QSettings.IniFormat)
-        conf.beginGroup('config')
-        conf.setValue('identifier', self._config['identifier'])
-        conf.setValue('registration_mode', self._config['registration_mode'])
-        for l in LLLANDMARKS:
-            conf.setValue(l, self._config[l])
-        conf.setValue('pcs_to_fit', self._config['pcs_to_fit'])
-        conf.setValue('mweight', self._config['mweight'])
-        conf.setValue('knee_corr', self._config['knee_corr'])
-        conf.setValue('knee_dof', self._config['knee_dof'])
-        conf.setValue('marker_radius', self._config['marker_radius'])
-        conf.setValue('skin_pad', self._config['skin_pad'])
-        conf.setValue('GUI', self._config['GUI'])
-        conf.setValue('side', self._config['side'])
-        conf.endGroup()
+        return json.dumps(self._config, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
-
-    def deserialize(self, location):
+    def deserialize(self, string):
         '''
-        Add code to deserialize this step from disk.  As with the serialize 
-        method the filename should use the step identifier.  Obviously the 
-        filename used here should be the same as the one used by the
-        serialize method.
+        Add code to deserialize this step from disk. Parses a json string
+        given by mapclient
         '''
-        configuration_file = os.path.join(location, self.getIdentifier() + '.conf')
-        conf = QtCore.QSettings(configuration_file, QtCore.QSettings.IniFormat)
-        conf.beginGroup('config')
-        self._config['identifier'] = conf.value('identifier', '')
-        self._config['registration_mode'] = conf.value('registration_mode', '')
-        self._config['pcs_to_fit'] = conf.value('pcs_to_fit', '')
-        self._config['knee_corr'] = conf.value('knee_corr', '')
-        self._config['knee_dof'] = conf.value('knee_dof', '')
-        self._config['mweight'] = conf.value('mweight', '')
-        self._config['marker_radius'] = conf.value('marker_radius', '')
-        self._config['skin_pad'] = conf.value('skin_pad', '')
-        self._config['side'] = conf.value('side', '')
-        for l in LLLANDMARKS:
-            self._config[l] = conf.value(l, '')
-        self._config['GUI'] = conf.value('GUI', 'True')
-        conf.endGroup()
+        self._config.update(json.loads(string))
 
         d = ConfigureDialog()
         d.identifierOccursCount = self._identifierOccursCount
