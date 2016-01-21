@@ -5,11 +5,11 @@ import os
 import numpy as np
 import copy
 
-from fieldwork.field import geometric_field
-from gias.musculoskeletal import mocap_landmark_preprocess
-from gias.musculoskeletal.bonemodels import bonemodels
-from gias.musculoskeletal.bonemodels import lowerlimbatlasfit
-from gias.musculoskeletal.bonemodels import lowerlimbatlasfitscaling
+from gias2.fieldwork.field import geometric_field
+from gias2.musculoskeletal import mocap_landmark_preprocess
+from gias2.musculoskeletal.bonemodels import bonemodels
+from gias2.musculoskeletal.bonemodels import lowerlimbatlasfit
+from gias2.musculoskeletal.bonemodels import lowerlimbatlasfitscaling
 
 def _trimAngle(a):
     if a < -np.pi:
