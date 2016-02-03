@@ -20,8 +20,24 @@ LLLANDMARKS = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
 
 class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
     '''
-    Skeleton step which is intended to be a helpful starting point
-    for new steps.
+    Step for customising the left lower limb bones to motion capture markers.
+
+    Inputs
+    ------
+    landmarks : dict
+        Dictionary of marker names : marker coordinates
+    principalcomponents : gias2.learning.PCA.PrincipalComponents instance
+        The lowerlimb principalcomponents to use for the optimisation
+    fieldworkmodeldict : dict [optional, unused]
+        Dictionary of model names : fieldwork models
+
+    Outputs
+    -------
+    fieldworkmodeldict : dict
+        A dictionary of customised fieldwork models of lower limb bones.
+        Dictionary keys are: "pelvis", "pelvis flat", 'hemipelvis-left",
+        "hemipelvis-right", "sacrum", "femur", "tibiafibula", "tibia",
+        "fibula", "patella".
     '''
 
     def __init__(self, location):
