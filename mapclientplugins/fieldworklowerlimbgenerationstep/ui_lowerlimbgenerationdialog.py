@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'qt/lowerlimbgenerationdialog.ui'
+# Form implementation generated from reading ui file 'lowerlimbgenerationdialog.ui'
 #
-# Created: Sat Jun 20 22:10:13 2015
+# Created: Mon Mar  7 21:45:56 2016
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -32,7 +32,15 @@ class Ui_Dialog(object):
         self.gridLayout = QtGui.QGridLayout(self.widget)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setObjectName("gridLayout")
-        self.widget1 = QtGui.QWidget(self.widget)
+        self.MayaviScene = MayaviSceneWidget(self.widget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(1)
+        sizePolicy.setHeightForWidth(self.MayaviScene.sizePolicy().hasHeightForWidth())
+        self.MayaviScene.setSizePolicy(sizePolicy)
+        self.MayaviScene.setObjectName("MayaviScene")
+        self.widget1 = QtGui.QWidget(self.MayaviScene)
+        self.widget1.setGeometry(QtCore.QRect(0, 0, 441, 686))
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -62,6 +70,7 @@ class Ui_Dialog(object):
         self.tableWidget.horizontalHeader().setDefaultSectionSize(100)
         self.verticalLayout_3.addWidget(self.tableWidget)
         self.toolBox = QtGui.QToolBox(self.widget1)
+        self.toolBox.setMinimumSize(QtCore.QSize(0, 0))
         self.toolBox.setObjectName("toolBox")
         self.page_2 = QtGui.QWidget()
         self.page_2.setGeometry(QtCore.QRect(0, 0, 382, 388))
@@ -124,7 +133,7 @@ class Ui_Dialog(object):
         self.formLayout_3.setWidget(8, QtGui.QFormLayout.FieldRole, self.doubleSpinBox_skinPad)
         self.toolBox.addItem(self.page_2, "")
         self.page = QtGui.QWidget()
-        self.page.setGeometry(QtCore.QRect(0, 0, 405, 388))
+        self.page.setGeometry(QtCore.QRect(0, 0, 423, 388))
         self.page.setObjectName("page")
         self.verticalLayout_5 = QtGui.QVBoxLayout(self.page)
         self.verticalLayout_5.setObjectName("verticalLayout_5")
@@ -148,13 +157,13 @@ class Ui_Dialog(object):
         self.doubleSpinBox_ptx.setObjectName("doubleSpinBox_ptx")
         self.horizontalLayout_11.addWidget(self.doubleSpinBox_ptx)
         self.doubleSpinBox_pty = QtGui.QDoubleSpinBox(self.page)
-        self.doubleSpinBox_pty.setMinimum(-1000.0)
-        self.doubleSpinBox_pty.setMaximum(1000.0)
+        self.doubleSpinBox_pty.setMinimum(-10000.0)
+        self.doubleSpinBox_pty.setMaximum(10000.0)
         self.doubleSpinBox_pty.setObjectName("doubleSpinBox_pty")
         self.horizontalLayout_11.addWidget(self.doubleSpinBox_pty)
         self.doubleSpinBox_ptz = QtGui.QDoubleSpinBox(self.page)
-        self.doubleSpinBox_ptz.setMinimum(-1000.0)
-        self.doubleSpinBox_ptz.setMaximum(1000.0)
+        self.doubleSpinBox_ptz.setMinimum(-10000.0)
+        self.doubleSpinBox_ptz.setMaximum(10000.0)
         self.doubleSpinBox_ptz.setObjectName("doubleSpinBox_ptz")
         self.horizontalLayout_11.addWidget(self.doubleSpinBox_ptz)
         self.formLayout_5.setLayout(3, QtGui.QFormLayout.FieldRole, self.horizontalLayout_11)
@@ -418,19 +427,11 @@ class Ui_Dialog(object):
         self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.screenshotSaveButton)
         self.toolBox.addItem(self.Screenshot, "")
         self.verticalLayout_3.addWidget(self.toolBox)
-        self.gridLayout.addWidget(self.widget1, 0, 0, 1, 1)
-        self.MayaviScene = MayaviSceneWidget(self.widget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(1)
-        sizePolicy.setVerticalStretch(1)
-        sizePolicy.setHeightForWidth(self.MayaviScene.sizePolicy().hasHeightForWidth())
-        self.MayaviScene.setSizePolicy(sizePolicy)
-        self.MayaviScene.setObjectName("MayaviScene")
-        self.gridLayout.addWidget(self.MayaviScene, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.MayaviScene, 0, 0, 1, 1)
         self.horizontalLayout_2.addWidget(self.widget)
 
         self.retranslateUi(Dialog)
-        self.toolBox.setCurrentIndex(0)
+        self.toolBox.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
         Dialog.setTabOrder(self.tableWidget, self.screenshotPixelXLineEdit)
         Dialog.setTabOrder(self.screenshotPixelXLineEdit, self.screenshotPixelYLineEdit)
@@ -487,4 +488,4 @@ class Ui_Dialog(object):
         self.screenshotSaveButton.setText(QtGui.QApplication.translate("Dialog", "Save Screenshot", None, QtGui.QApplication.UnicodeUTF8))
         self.toolBox.setItemText(self.toolBox.indexOf(self.Screenshot), QtGui.QApplication.translate("Dialog", "Screenshots", None, QtGui.QApplication.UnicodeUTF8))
 
-from gias2.mappluginutils.mayaviviewer import MayaviSceneWidget
+from mayaviscenewidget import MayaviSceneWidget
