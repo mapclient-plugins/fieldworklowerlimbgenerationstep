@@ -2,6 +2,8 @@
 
 from PySide import QtGui
 from mapclientplugins.fieldworklowerlimbgenerationstep.ui_configuredialog import Ui_Dialog
+from mapclientplugins.fieldworklowerlimbgenerationstep.llstep import validModelLandmarks
+from mapclientplugins.fieldworklowerlimbgenerationstep.landmarktablewidget import LandmarkComboBoxTextTable
 
 INVALID_STYLE_SHEET = 'background-color: rgba(239, 0, 0, 50)'
 DEFAULT_STYLE_SHEET = ''
@@ -31,6 +33,11 @@ class ConfigureDialog(QtGui.QDialog):
         # We will use this method to decide whether the identifier is unique.
         self.identifierOccursCount = None
 
+        self.landmarkTable = LandmarkComboBoxTextTable(
+                                validModelLandmarks,
+                                self._ui.tableWidgetLandmarks,
+                                )
+
         self._makeConnections()
 
         for regmode in REG_MODES:
@@ -41,6 +48,8 @@ class ConfigureDialog(QtGui.QDialog):
 
     def _makeConnections(self):
         self._ui.lineEdit_id.textChanged.connect(self.validate)
+        self._ui.pushButton_addLandmark.clicked.connect(self.landmarkTable.addLandmark)
+        self._ui.pushButton_removeLandmark.clicked.connect(self.landmarkTable.removeLandmark)
 
     def accept(self):
         '''
@@ -86,13 +95,7 @@ class ConfigureDialog(QtGui.QDialog):
         config['side'] = self._ui.comboBox_side.currentText()
         config['pcs_to_fit'] = str(self._ui.spinBox_pcsToFit.value())
         config['mweight'] = str(self._ui.doubleSpinBox_mWeight.value())
-        config['pelvis-RASIS'] = self._ui.lineEdit_RASIS.text()
-        config['pelvis-LASIS'] = self._ui.lineEdit_LASIS.text()
-        config['pelvis-Sacral'] = self._ui.lineEdit_Sacral.text()
-        config['femur-LEC'] = self._ui.lineEdit_LEC.text()
-        config['femur-MEC'] = self._ui.lineEdit_MEC.text()
-        config['tibiafibula-LM'] = self._ui.lineEdit_LM.text()
-        config['tibiafibula-MM'] = self._ui.lineEdit_MM.text()
+        config['landmarks'] = self.landmarkTable.getLandmarkPairs()
         config['marker_radius'] = self._ui.doubleSpinBox_markerRadius.value()
         config['skin_pad'] = self._ui.doubleSpinBox_skinPad.value()
         if self._ui.checkBox_kneecorr.isChecked():
@@ -129,13 +132,19 @@ class ConfigureDialog(QtGui.QDialog):
 
         self._ui.spinBox_pcsToFit.setValue(int(config['pcs_to_fit']))
         self._ui.doubleSpinBox_mWeight.setValue(float(config['mweight']))
-        self._ui.lineEdit_RASIS.setText(config['pelvis-RASIS'])
-        self._ui.lineEdit_LASIS.setText(config['pelvis-LASIS'])
-        self._ui.lineEdit_Sacral.setText(config['pelvis-Sacral'])
-        self._ui.lineEdit_LEC.setText(config['femur-LEC'])
-        self._ui.lineEdit_MEC.setText(config['femur-MEC'])
-        self._ui.lineEdit_MM.setText(config['tibiafibula-MM'])
-        self._ui.lineEdit_LM.setText(config['tibiafibula-LM'])
+
+        if config.get('landmarks') is None:
+            config['landmarks'] = {}
+            config['landmarks']['pelvis-LASIS'] = config['pelvis-LASIS']
+            config['landmarks']['pelvis-RASIS'] = config['pelvis-RASIS']
+            config['landmarks']['pelvis-Sacral'] = config['pelvis-Sacral']
+            config['landmarks']['femur-MEC'] = config['femur-MEC']
+            config['landmarks']['femur-LEC'] = config['femur-LEC']
+            config['landmarks']['tibiafibula-MM'] = config['tibiafibula-MM']
+            config['landmarks']['tibiafibula-LM'] = config['tibiafibula-LM']
+
+        for ml, il in sorted(config['landmarks'].items()):
+            self.landmarkTable.addLandmark(ml, il)
         self._ui.doubleSpinBox_markerRadius.setValue(float(config['marker_radius']))
         self._ui.doubleSpinBox_skinPad.setValue(float(config['skin_pad']))
         if config['knee_corr']=='True':

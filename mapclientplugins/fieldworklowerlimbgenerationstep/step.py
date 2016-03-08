@@ -13,7 +13,7 @@ from mapclientplugins.fieldworklowerlimbgenerationstep.configuredialog import Co
 from mapclientplugins.fieldworklowerlimbgenerationstep import llstep
 from mapclientplugins.fieldworklowerlimbgenerationstep.lowerlimbgenerationdialog import LowerLimbGenerationDialog
 
-LLLANDMARKS = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
+DEFAULT_MODEL_LANDMARKS = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
                'femur-MEC', 'femur-LEC', 'tibiafibula-MM',
                'tibiafibula-LM',
                )
@@ -72,8 +72,9 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         self._config['marker_radius'] = '5.0'
         self._config['skin_pad'] = '5.0'
         self._config['side'] = 'left'
-        for l in LLLANDMARKS:
-            self._config[l] = ''
+        self._config['landmarks'] = {}
+        for l in DEFAULT_MODEL_LANDMARKS:
+            self._config['landmarks'][l] = ''
 
         self._data = llstep.LLStepData(self._config)
 
@@ -159,6 +160,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         Add code to serialize this step to disk. Returns a json string for
         mapclient to serialise.
         '''
+        self._fix_legacy_config()
         return json.dumps(self._config, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
     def deserialize(self, string):
@@ -167,10 +169,30 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         given by mapclient
         '''
         self._config.update(json.loads(string))
+        self._fix_legacy_config()
 
         d = ConfigureDialog()
         d.identifierOccursCount = self._identifierOccursCount
         d.setConfig(self._config)
         self._configured = d.validate()
 
+    def _fix_legacy_config(self):
+        # legacy configs
+        if self._config.get('landmarks') is None:
+            self._config['landmarks'] = {}
+            self._config['landmarks']['pelvis-LASIS'] = self._config['pelvis-LASIS']
+            self._config['landmarks']['pelvis-RASIS'] = self._config['pelvis-RASIS']
+            self._config['landmarks']['pelvis-Sacral'] = self._config['pelvis-Sacral']
+            self._config['landmarks']['femur-MEC'] = self._config['femur-MEC']
+            self._config['landmarks']['femur-LEC'] = self._config['femur-LEC']
+            self._config['landmarks']['tibiafibula-MM'] = self._config['tibiafibula-MM']
+            self._config['landmarks']['tibiafibula-LM'] = self._config['tibiafibula-LM']
+
+            del self._config['pelvis-LASIS']
+            del self._config['pelvis-RASIS']
+            del self._config['pelvis-Sacral']
+            del self._config['femur-MEC']
+            del self._config['femur-LEC']
+            del self._config['tibiafibula-MM']
+            del self._config['tibiafibula-LM']
 

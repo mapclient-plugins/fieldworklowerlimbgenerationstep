@@ -11,6 +11,32 @@ from gias2.musculoskeletal.bonemodels import bonemodels
 from gias2.musculoskeletal.bonemodels import lowerlimbatlasfit
 from gias2.musculoskeletal.bonemodels import lowerlimbatlasfitscaling
 
+validModelLandmarks = (
+    'femur-GT',
+    'femur-HC',
+    'femur-LEC',
+    'femur-MEC',
+    'femur-kneecentre',
+    'pelvis-LASIS',
+    'pelvis-LHJC',
+    'pelvis-LIS',
+    'pelvis-LIT',
+    'pelvis-LPS',
+    'pelvis-LPSIS',
+    'pelvis-RASIS',
+    'pelvis-RHJC',
+    'pelvis-RIS',
+    'pelvis-RIT',
+    'pelvis-RPS',
+    'pelvis-RPSIS',
+    'pelvis-Sacral',
+    'tibiafibula-LC',
+    'tibiafibula-LM',
+    'tibiafibula-MC',
+    'tibiafibula-MM',
+    'tibiafibula-TT',
+    )
+
 def _trimAngle(a):
     if a < -np.pi:
         return a + 2*np.pi
@@ -27,7 +53,7 @@ class LLTransformData(object):
         self._hipRot = np.array([0.0, 0.0, 0.0])
         self._kneeRot = np.array([0.0, 0.0, 0.0])
         self.nShapeModes = 1
-        self.shapeModes = [0,]
+        # self.shapeModes = [0,]
         self._shapeModeWeights = np.zeros(self.SHAPEMODESMAX, dtype=float)
         self.uniformScaling = 1.0
         self.pelvisScaling = 1.0
@@ -82,6 +108,10 @@ class LLTransformData(object):
             self._kneeRot[2] = _trimAngle(value[1])
         else:
             self._kneeRot[0] = _trimAngle(value[0])
+
+    @property
+    def shapeModes(self):
+        return np.arange(self.nShapeModes, dtype=int)
     
     @property
     def shapeModeWeights(self):
@@ -219,10 +249,10 @@ class LLStepData(object):
                                            ),
                             }
     _validRegistrationModes = ('shapemodel', 'uniformscaling', 'perbonescaling')
-    landmarkNames = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
-                      'femur-LEC', 'femur-MEC', 'tibiafibula-LM',
-                      'tibiafibula-MM',
-                      )
+    # landmarkNames = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
+    #                   'femur-LEC', 'femur-MEC', 'tibiafibula-LM',
+    #                   'tibiafibula-MM',
+    #                   )
     minArgs = {'method':'L-BFGS-B',
                  'jac':False,
                  'bounds':None, 'tol':1e-6,
@@ -264,8 +294,7 @@ class LLStepData(object):
         self.landmarkRMSE = None
 
     def updateFromConfig(self):
-        targetLandmarkNames = [self.config[ln] for ln in self.landmarkNames]
-        self.targetLandmarkNames = targetLandmarkNames
+        # self.targetLandmarkNames = [self.config['landmarks'][ln] for ln in self.landmarkNames]
         self.nShapeModes = self.config['pcs_to_fit']
         if self.kneeCorr:
             self.LL.enable_knee_adduction_correction()
@@ -288,11 +317,12 @@ class LLStepData(object):
                                   )
 
     def _preprocessLandmarks(self, l):
-        return np.array(mocap_landmark_preprocess.preprocess_lower_limb(
-                        self.markerRadius,
-                        self.skinPad,
-                        l[0], l[1], l[2], l[3], l[4], l[5], l[6]),
-                        )
+        return l
+        # return np.array(mocap_landmark_preprocess.preprocess_lower_limb(
+        #                 self.markerRadius,
+        #                 self.skinPad,
+        #                 l[0], l[1], l[2], l[3], l[4], l[5], l[6]),
+        #                 )
 
     @property
     def outputModelDict(self):
@@ -394,22 +424,27 @@ class LLStepData(object):
             raise ValueError('Invalid registration mode. Given {}, must be one of {}'.format(value, self.validRegistrationModes))
 
     @property
+    def landmarkNames(self):
+        return sorted(self.config['landmarks'].keys())
+    
+    @property
     def targetLandmarkNames(self):
         # return self._targetLandmarkNames
-        return [self.config[ln] for ln in self.landmarkNames]
+        # return [self.config['landmarks'][ln] for ln in self.landmarkNames]
+        return [self.config['landmarks'][ln] for ln in self.landmarkNames]
 
-    @targetLandmarkNames.setter
-    def targetLandmarkNames(self, value):
-        if len(value)!=7:
-            raise ValueError('7 input landmark names required for {}'.format(self._landmarkNames))
-        else:
-            # self._targetLandmarkNames = value
-            # save to config dict
-            for li, ln in enumerate(self.landmarkNames):
-                self.config[ln] = value[li]
-            # evaluate target landmark coordinates
-            # if (self.inputLandmarks is not None) and ('' not in value):
-            #     self._targetLandmarks = np.array([self.inputLandmarks[n] for n in self._targetLandmarkNames])
+    # @targetLandmarkNames.setter
+    # def targetLandmarkNames(self, value):
+    #     if len(value)!=7:
+    #         raise ValueError('7 input landmark names required for {}'.format(self._landmarkNames))
+    #     else:
+    #         # self._targetLandmarkNames = value
+    #         # save to config dict
+    #         for li, ln in enumerate(self.landmarkNames):
+    #             self.config[ln] = value[li]
+    #         # evaluate target landmark coordinates
+    #         # if (self.inputLandmarks is not None) and ('' not in value):
+    #         #     self._targetLandmarks = np.array([self.inputLandmarks[n] for n in self._targetLandmarkNames])
 
     @property
     def targetLandmarks(self):
@@ -461,7 +496,7 @@ class LLStepData(object):
         self.config['pcs_to_fit'] = str(n)
         n = int(n)
         self.T.nShapeModes = n
-        self.T.shapeModes = np.arange(n, dtype=int)
+        # self.T.shapeModes = np.arange(n, dtype=int)
 
     @property
     def kneeCorr(self):
@@ -507,6 +542,8 @@ class LLStepData(object):
         if mode=='shapemodel':
             if self.T.shapeModes is None:
                 raise RuntimeError('Number of pcs to fit not defined')
+            else:
+                print('shape models {}'.format(self.T.shapeModes))
             if self.mWeight is None:
                 raise RuntimeError('Mahalanobis penalty weight not defined')
             output = _registerShapeModel(self, callback)
@@ -528,6 +565,7 @@ def _registerShapeModel(lldata, callback=None):
     print(x0)
 
     # do the fit
+    print(lldata.T.nShapeModes, lldata.T.shapeModes, lldata.mWeight)
     xFitted,\
     optLandmarkDist,\
     optLandmarkRMSE,\

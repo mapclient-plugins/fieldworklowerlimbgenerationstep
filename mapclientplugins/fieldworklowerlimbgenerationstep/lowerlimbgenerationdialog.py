@@ -34,10 +34,11 @@ from gias2.mappluginutils.mayaviviewer import MayaviViewerObjectsContainer,\
                                               MayaviViewerLandmark,\
                                               MayaviViewerFieldworkModel,\
                                               colours
+from mapclientplugins.fieldworklowerlimbgenerationstep.landmarktablewidget import LandmarkComboBoxTable
+from mapclientplugins.fieldworklowerlimbgenerationstep.llstep import validModelLandmarks
+
 import numpy as np
 import copy
-
-
 
 class _ExecThread(QThread):
     update = Signal(tuple)
@@ -69,6 +70,7 @@ class LowerLimbGenerationDialog(QDialog):
         '''
         Constructor
         '''
+        print('###0')
         QDialog.__init__(self, parent)
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
@@ -109,7 +111,7 @@ class LowerLimbGenerationDialog(QDialog):
                                                                )
                                     )
         # 'none' is first elem in self._landmarkNames, so skip that
-        for ln, lcoords in self.data.inputLandmarks.items():
+        for ln, lcoords in sorted(self.data.inputLandmarks.items()):
             self._objects.addObject(ln, MayaviViewerLandmark(ln,
                                                              lcoords,
                                                              renderArgs=self._landmarkRenderArgs
@@ -122,14 +124,12 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.screenshotPixelYLineEdit.setValidator(QIntValidator())
 
         # landmarks page
-        for l in self.data.inputLandmarks.keys():
-            self._ui.comboBox_LASIS.addItem(l)
-            self._ui.comboBox_RASIS.addItem(l)
-            self._ui.comboBox_Sacral.addItem(l)
-            self._ui.comboBox_MEC.addItem(l)
-            self._ui.comboBox_LEC.addItem(l)
-            self._ui.comboBox_MM.addItem(l)
-            self._ui.comboBox_LM.addItem(l)
+        validInputLandmarks = sorted(self.data.inputLandmarks.keys())
+        self.landmarkTable = LandmarkComboBoxTable(
+                                validModelLandmarks,
+                                validInputLandmarks,
+                                self._ui.tableWidgetLandmarks,
+                                )
 
         # auto reg page
         self._ui.spinBox_pcsToFit.setMaximum(self.data.T.SHAPEMODESMAX)
@@ -139,54 +139,10 @@ class LowerLimbGenerationDialog(QDialog):
         # disable manual scaling adjustment, just use the shape model
         self._ui.doubleSpinBox_scaling.setEnabled(False)
 
-        self._updateConfigs()
-
     def _updateConfigs(self):
         # landmarks page
-        if self.data.targetLandmarkNames is not None:
-            inputLandmarkNames = self.data.inputLandmarks.keys()
-            if self.data.targetLandmarkNames[0]:
-                self._ui.comboBox_LASIS.setCurrentIndex(
-                    inputLandmarkNames.index(
-                        self.data.targetLandmarkNames[0],
-                        )
-                    )
-            if self.data.targetLandmarkNames[1]:
-                self._ui.comboBox_RASIS.setCurrentIndex(
-                inputLandmarkNames.index(
-                    self.data.targetLandmarkNames[1],
-                    )
-                )
-            if self.data.targetLandmarkNames[2]:
-                self._ui.comboBox_Sacral.setCurrentIndex(
-                inputLandmarkNames.index(
-                    self.data.targetLandmarkNames[2],
-                    )
-                )
-            if self.data.targetLandmarkNames[3]:
-                self._ui.comboBox_LEC.setCurrentIndex(
-                inputLandmarkNames.index(
-                    self.data.targetLandmarkNames[3],
-                    )
-                )
-            if self.data.targetLandmarkNames[4]:
-                self._ui.comboBox_MEC.setCurrentIndex(
-                inputLandmarkNames.index(
-                    self.data.targetLandmarkNames[4],
-                    )
-                )
-            if self.data.targetLandmarkNames[5]:
-                self._ui.comboBox_LM.setCurrentIndex(
-                inputLandmarkNames.index(
-                    self.data.targetLandmarkNames[5],
-                    )
-                )
-            if self.data.targetLandmarkNames[6]:
-                self._ui.comboBox_MM.setCurrentIndex(
-                inputLandmarkNames.index(
-                    self.data.targetLandmarkNames[6],
-                    )
-                )
+        for ml, il in sorted(self.data.config['landmarks'].items()):
+            self.landmarkTable.addLandmark(ml, il)
 
         self._ui.doubleSpinBox_markerRadius.setValue(self.data.markerRadius)
         self._ui.doubleSpinBox_skinPad.setValue(self.data.skinPad)
@@ -227,14 +183,8 @@ class LowerLimbGenerationDialog(QDialog):
 
     def _saveConfigs(self):
         # landmarks page
-        self.data.targetLandmarkNames = (str(self._ui.comboBox_LASIS.currentText()),
-                                         str(self._ui.comboBox_RASIS.currentText()),
-                                         str(self._ui.comboBox_Sacral.currentText()),
-                                         str(self._ui.comboBox_LEC.currentText()),
-                                         str(self._ui.comboBox_MEC.currentText()),
-                                         str(self._ui.comboBox_LM.currentText()),
-                                         str(self._ui.comboBox_MM.currentText()),
-                                        )
+        self.data.config['landmarks'] = self.landmarkTable.getLandmarkPairs()
+        print(self.data.config['landmarks'])
         self.data.markerRadius = self._ui.doubleSpinBox_markerRadius.value()
         self.data.skinPad = self._ui.doubleSpinBox_skinPad.value()
 
@@ -275,6 +225,12 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.tableWidget.itemClicked.connect(self._tableItemClicked)
         self._ui.tableWidget.itemChanged.connect(self._visibleBoxChanged)
         self._ui.screenshotSaveButton.clicked.connect(self._saveScreenShot)
+
+        # landmarks
+        # self.landmarktablewidget.table.itemClicked.connect(self._saveConfigs)
+        self.landmarkTable.table.itemChanged.connect(self._saveConfigs)
+        self._ui.pushButton_addLandmark.clicked.connect(self.landmarkTable.addLandmark)
+        self._ui.pushButton_removeLandmark.clicked.connect(self.landmarkTable.removeLandmark)
         
         # manual reg
         self._ui.doubleSpinBox_pc1.valueChanged.connect(self._manualRegUpdate)
@@ -314,7 +270,7 @@ class LowerLimbGenerationDialog(QDialog):
         
         # 'none' is first elem in self._landmarkNames, so skip that
         row = 0
-        for li, ln in enumerate(self.data.inputLandmarks.keys()):
+        for li, ln in enumerate(sorted(self.data.inputLandmarks.keys())):
             self._addObjectToTable(li, ln, self._objects.getObject(ln), checked=True)
             row+=1
 
@@ -394,13 +350,7 @@ class LowerLimbGenerationDialog(QDialog):
         self.data.kneeDOF = self._ui.checkBox_kneedof.isChecked()
 
     def _regLockUI(self):
-        self._ui.comboBox_LASIS.setEnabled(False)
-        self._ui.comboBox_RASIS.setEnabled(False)
-        self._ui.comboBox_Sacral.setEnabled(False)
-        self._ui.comboBox_MEC.setEnabled(False)
-        self._ui.comboBox_LEC.setEnabled(False)
-        self._ui.comboBox_MM.setEnabled(False)
-        self._ui.comboBox_LM.setEnabled(False)
+        self.landmarkTable.disable()
         self._ui.doubleSpinBox_markerRadius.setEnabled(False)
         self._ui.doubleSpinBox_skinPad.setEnabled(False)
 
@@ -435,13 +385,7 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.pushButton_auto_reg.setEnabled(False)
 
     def _regUnlockUI(self):
-        self._ui.comboBox_LASIS.setEnabled(True)
-        self._ui.comboBox_RASIS.setEnabled(True)
-        self._ui.comboBox_Sacral.setEnabled(True)
-        self._ui.comboBox_LEC.setEnabled(True)
-        self._ui.comboBox_MEC.setEnabled(True)
-        self._ui.comboBox_LM.setEnabled(True)
-        self._ui.comboBox_MM.setEnabled(True)
+        self.landmarkTable.enable()
         self._ui.doubleSpinBox_markerRadius.setEnabled(True)
         self._ui.doubleSpinBox_skinPad.setEnabled(True)
 
