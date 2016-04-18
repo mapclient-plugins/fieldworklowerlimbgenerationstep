@@ -141,6 +141,7 @@ class LowerLimbGenerationDialog(QDialog):
 
     def _updateConfigs(self):
         # landmarks page
+        self.landmarkTable.clearTable()
         for ml, il in sorted(self.data.config['landmarks'].items()):
             self.landmarkTable.addLandmark(ml, il)
 

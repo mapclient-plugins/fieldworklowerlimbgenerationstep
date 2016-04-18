@@ -68,14 +68,23 @@ class LandmarkComboBoxTable(object):
         self._rowCount += 1
         print('row added {}'.format(self._rowCount))
 
-    def removeLandmark(self):
+    def removeLandmark(self, selectedRow=None):
         """
-        Delete the currently selected row from the table
+        Delete the specified or if not specified, the currently selected
+        row from the table
         """
-        selectedRow = self.table.currentRow()
+        if selectedRow is None:
+            selectedRow = self.table.currentRow()
         self.table.removeRow(selectedRow)
         self._comboBoxes.remove(self._comboBoxes[selectedRow])
         self._rowCount -= 1
+
+    def clearTable(self):
+        """
+        Delete all rows
+        """
+        while self._rowCount>0:
+            self.removeLandmark(0)
 
     def getLandmarkPairs(self):
         """
@@ -158,14 +167,23 @@ class LandmarkComboBoxTextTable(object):
         self._rowCount += 1
         print('row added {}'.format(self._rowCount))
 
-    def removeLandmark(self):
+    def removeLandmark(self, selectedRow=None):
         """
-        Delete the currently selected row from the table
+        Delete the specified or if not specified, the currently selected
+        row from the table
         """
-        selectedRow = self.table.currentRow()
+        if selectedRow is None:
+            selectedRow = self.table.currentRow()
         self.table.removeRow(selectedRow)
         self._rowElems.remove(self._rowElems[selectedRow])
         self._rowCount -= 1
+
+    def clearTable(self):
+        """
+        Delete all rows
+        """
+        while self._rowCount>0:
+            self.removeLandmark(0)
 
     def getLandmarkPairs(self):
         """
