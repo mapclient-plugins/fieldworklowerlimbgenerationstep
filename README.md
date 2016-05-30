@@ -29,3 +29,29 @@ fieldworkmodeldict : dict
     Dictionary keys are: "pelvis", "pelvis flat", 'hemipelvis-left",
     "hemipelvis-right", "sacrum", "femur", "tibiafibula", "tibia",
     "fibula", "patella".
+
+Supported Landmarks
+-------------------
+pelvis-LASIS : pelvis left anterior superior iliac spine
+pelvis-LPSIS : pelvis left posterior superior iliac spine
+pelvis-LHJC : pelvis left hip joint centre
+pelvis-LIS : pelvis left ischial spine 
+pelvis-LIT : pelvis left ischial tuberosity
+pelvis-LPS : pelvis left pubis symphysis
+pelvis-RASIS : pelvis right anterior superior iliac spine
+pelvis-RPSIS : pelvis right posterior superior iliac spine
+pelvis-RHJC : pelvis right hip joint centre
+pelvis-RIS : pelvis right ischial spine 
+pelvis-RIT : pelvis right ischial tuberosity
+pelvis-RPS : pelvis right pubis symphysis
+pelvis-Sacral : pelvis sacral
+femur-GT : femur greater trochanter
+femur-HC : femur head centre
+femur-LEC : femur lateral epicondyle
+femur-MEC : femur medial epicondyle
+femur-kneecentre : femur knee centre
+tibiafibula-LC : tibia-fibula tibia plateau most lateral point
+tibiafibula-MC : tibia-fibula tibia plateau most medial point
+tibiafibula-LM : tibia-fibula lateral malleolus
+tibiafibula-MM : tibia-fibula medial malleolus
+tibiafibula-TT : tibia-fibula tibial tuberosity
