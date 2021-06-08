@@ -2,10 +2,7 @@
 '''
 MAP Client Plugin Step
 '''
-import os
 import json
-
-from PySide import QtGui
 
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclientplugins.fieldworklowerlimbgenerationstep.configuredialog import ConfigureDialog

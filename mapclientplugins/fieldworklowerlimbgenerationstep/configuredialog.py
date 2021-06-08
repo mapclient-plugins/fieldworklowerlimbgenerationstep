@@ -1,6 +1,6 @@
 
 
-from PySide import QtGui
+from PySide2 import QtWidgets
 from mapclientplugins.fieldworklowerlimbgenerationstep.ui_configuredialog import Ui_Dialog
 from mapclientplugins.fieldworklowerlimbgenerationstep.llstep import validModelLandmarks
 from mapclientplugins.fieldworklowerlimbgenerationstep.landmarktablewidget import LandmarkComboBoxTextTable
@@ -11,7 +11,7 @@ DEFAULT_STYLE_SHEET = ''
 REG_MODES = ('shapemodel', 'uniformscaling', 'perbonescaling', 'manual')
 SIDEOPTIONS = ('left', 'right')
 
-class ConfigureDialog(QtGui.QDialog):
+class ConfigureDialog(QtWidgets.QDialog):
     '''
     Configure dialog to present the user with the options to configure this step.
     '''
@@ -20,7 +20,7 @@ class ConfigureDialog(QtGui.QDialog):
         '''
         Constructor
         '''
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
@@ -56,14 +56,14 @@ class ConfigureDialog(QtGui.QDialog):
         Override the accept method so that we can confirm saving an
         invalid configuration.
         '''
-        result = QtGui.QMessageBox.Yes
+        result = QtWidgets.QMessageBox.Yes
         if not self.validate():
-            result = QtGui.QMessageBox.warning(self, 'Invalid Configuration',
+            result = QtWidgets.QMessageBox.warning(self, 'Invalid Configuration',
                 'This configuration is invalid.  Unpredictable behaviour may result if you choose \'Yes\', are you sure you want to save this configuration?)',
-                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
 
-        if result == QtGui.QMessageBox.Yes:
-            QtGui.QDialog.accept(self)
+        if result == QtWidgets.QMessageBox.Yes:
+            QtWidgets.QDialog.accept(self)
 
     def validate(self):
         '''
