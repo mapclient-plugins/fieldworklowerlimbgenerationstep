@@ -1,5 +1,3 @@
-
-
 from PySide2 import QtWidgets
 from mapclientplugins.fieldworklowerlimbgenerationstep.ui_configuredialog import Ui_Dialog
 from mapclientplugins.fieldworklowerlimbgenerationstep.llstep import validModelLandmarks
@@ -11,6 +9,7 @@ DEFAULT_STYLE_SHEET = ''
 REG_MODES = ('shapemodel', 'uniformscaling', 'perbonescaling', 'manual')
 SIDEOPTIONS = ('left', 'right')
 
+
 class ConfigureDialog(QtWidgets.QDialog):
     '''
     Configure dialog to present the user with the options to configure this step.
@@ -21,7 +20,7 @@ class ConfigureDialog(QtWidgets.QDialog):
         Constructor
         '''
         QtWidgets.QDialog.__init__(self, parent)
-        
+
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
 
@@ -34,9 +33,9 @@ class ConfigureDialog(QtWidgets.QDialog):
         self.identifierOccursCount = None
 
         self.landmarkTable = LandmarkComboBoxTextTable(
-                                validModelLandmarks,
-                                self._ui.tableWidgetLandmarks,
-                                )
+            validModelLandmarks,
+            self._ui.tableWidgetLandmarks,
+        )
 
         self._makeConnections()
 
@@ -59,8 +58,9 @@ class ConfigureDialog(QtWidgets.QDialog):
         result = QtWidgets.QMessageBox.Yes
         if not self.validate():
             result = QtWidgets.QMessageBox.warning(self, 'Invalid Configuration',
-                'This configuration is invalid.  Unpredictable behaviour may result if you choose \'Yes\', are you sure you want to save this configuration?)',
-                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+                                                   'This configuration is invalid.  Unpredictable behaviour may result if you choose \'Yes\', are you sure you want to save this configuration?)',
+                                                   QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                                   QtWidgets.QMessageBox.No)
 
         if result == QtWidgets.QMessageBox.Yes:
             QtWidgets.QDialog.accept(self)
@@ -122,11 +122,11 @@ class ConfigureDialog(QtWidgets.QDialog):
         self._ui.lineEdit_id.setText(config['identifier'])
         self._ui.comboBox_regmode.setCurrentIndex(
             REG_MODES.index(config['registration_mode'])
-            )
+        )
         if config.get('side'):
             self._ui.comboBox_side.setCurrentIndex(
                 SIDEOPTIONS.index(config['side'])
-                )
+            )
         else:
             self._ui.comboBox_side.setCurrentIndex(0)
 
@@ -147,16 +147,15 @@ class ConfigureDialog(QtWidgets.QDialog):
             self.landmarkTable.addLandmark(ml, il)
         self._ui.doubleSpinBox_markerRadius.setValue(float(config['marker_radius']))
         self._ui.doubleSpinBox_skinPad.setValue(float(config['skin_pad']))
-        if config['knee_corr']=='True':
+        if config['knee_corr'] == 'True':
             self._ui.checkBox_kneecorr.setChecked(bool(True))
         else:
             self._ui.checkBox_kneecorr.setChecked(bool(False))
-        if config['knee_dof']=='True':
+        if config['knee_dof'] == 'True':
             self._ui.checkBox_kneedof.setChecked(bool(True))
         else:
             self._ui.checkBox_kneedof.setChecked(bool(False))
-        if config['GUI']=='True':
+        if config['GUI'] == 'True':
             self._ui.checkBox_GUI.setChecked(bool(True))
         else:
             self._ui.checkBox_GUI.setChecked(bool(False))
-

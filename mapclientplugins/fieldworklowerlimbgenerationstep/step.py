@@ -1,4 +1,3 @@
-
 '''
 MAP Client Plugin Step
 '''
@@ -11,9 +10,10 @@ from mapclientplugins.fieldworklowerlimbgenerationstep import llstep
 from mapclientplugins.fieldworklowerlimbgenerationstep.lowerlimbgenerationdialog import LowerLimbGenerationDialog
 
 DEFAULT_MODEL_LANDMARKS = ('pelvis-LASIS', 'pelvis-RASIS', 'pelvis-Sacral',
-               'femur-MEC', 'femur-LEC', 'tibiafibula-MM',
-               'tibiafibula-LM',
-               )
+                           'femur-MEC', 'femur-LEC', 'tibiafibula-MM',
+                           'tibiafibula-LM',
+                           )
+
 
 class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
     '''
@@ -39,7 +39,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
 
     def __init__(self, location):
         super(FieldworkLowerLimbGenerationStep, self).__init__('Fieldwork Lower Limb Generation', location)
-        self._configured = False # A step cannot be executed until it has been configured.
+        self._configured = False  # A step cannot be executed until it has been configured.
         self._category = 'Registration'
         # Add any other initialisation code here:
         # Ports:
@@ -85,8 +85,9 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         self._data.loadData()
         self._data.updateFromConfig()
         print('LL estimation configs:')
-        print self._data.config
-        if self._config['GUI']=='True':
+        print
+        self._data.config
+        if self._config['GUI'] == 'True':
             # start gui
             self._widget = LowerLimbGenerationDialog(self._data, self._doneExecution)
             self._widget.setModal(True)
@@ -102,11 +103,11 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         uses port for this step then the index can be ignored.
         '''
         if index == 0:
-            self._data.inputLandmarks = dataIn # http://physiomeproject.org/workflow/1.0/rdf-schema#landmarks
+            self._data.inputLandmarks = dataIn  # http://physiomeproject.org/workflow/1.0/rdf-schema#landmarks
         elif index == 1:
-            self._data.inputPCs = dataIn # ju#principalcomponents
+            self._data.inputPCs = dataIn  # ju#principalcomponents
         else:
-            self._data.inputModelDict = dataIn # ju#fieldworkmodeldict
+            self._data.inputModelDict = dataIn  # ju#fieldworkmodeldict
 
     def getPortData(self, index):
         '''
@@ -132,7 +133,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
         dlg.setConfig(self._config)
         dlg.validate()
         dlg.setModal(True)
-        
+
         if dlg.exec_():
             self._config = dlg.getConfig()
             self._data.config = self._config
@@ -192,4 +193,3 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
             del self._config['femur-LEC']
             del self._config['tibiafibula-MM']
             del self._config['tibiafibula-LM']
-

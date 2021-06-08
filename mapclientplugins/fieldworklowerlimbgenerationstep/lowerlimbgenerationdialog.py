@@ -18,7 +18,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os
-os.environ['ETS_TOOLKIT'] = 'qt4'
+
+os.environ['ETS_TOOLKIT'] = 'qt'
 
 from PySide2.QtWidgets import QDialog, QAbstractItemView, QTableWidgetItem
 from PySide2.QtGui import QIntValidator
@@ -29,15 +30,16 @@ from mapclientplugins.fieldworklowerlimbgenerationstep.ui_lowerlimbgenerationdia
 from traits.api import HasTraits, Instance, on_trait_change, \
     Int, Dict
 
-from gias2.mappluginutils.mayaviviewer import MayaviViewerObjectsContainer,\
-                                              MayaviViewerLandmark,\
-                                              MayaviViewerFieldworkModel,\
-                                              colours
+from gias2.mappluginutils.mayaviviewer import MayaviViewerObjectsContainer, \
+    MayaviViewerLandmark, \
+    MayaviViewerFieldworkModel, \
+    colours
 from mapclientplugins.fieldworklowerlimbgenerationstep.landmarktablewidget import LandmarkComboBoxTable
 from mapclientplugins.fieldworklowerlimbgenerationstep.llstep import validModelLandmarks
 
 import numpy as np
 import copy
+
 
 class _ExecThread(QThread):
     update = Signal(tuple)
@@ -54,16 +56,17 @@ class _ExecThread(QThread):
         output = self.func()
         self.update.emit(output)
 
+
 class LowerLimbGenerationDialog(QDialog):
     '''
     Configure dialog to present the user with the options to configure this step.
     '''
     defaultColor = colours['bone']
-    objectTableHeaderColumns = {'Visible':0}
-    backgroundColour = (0.0,0.0,0.0)
+    objectTableHeaderColumns = {'Visible': 0}
+    backgroundColour = (0.0, 0.0, 0.0)
     _modelRenderArgs = {}
-    _modelDisc = [8,8]
-    _landmarkRenderArgs = {'mode':'sphere', 'scale_factor':20.0, 'color':(0,1,0)}
+    _modelDisc = [8, 8]
+    _landmarkRenderArgs = {'mode': 'sphere', 'scale_factor': 20.0, 'color': (0, 1, 0)}
 
     def __init__(self, data, doneExecution, parent=None):
         '''
@@ -116,7 +119,7 @@ class LowerLimbGenerationDialog(QDialog):
                                                              renderArgs=self._landmarkRenderArgs
                                                              )
                                     )
-        
+
     def _setupGui(self):
         # screenshot page
         self._ui.screenshotPixelXLineEdit.setValidator(QIntValidator())
@@ -125,10 +128,10 @@ class LowerLimbGenerationDialog(QDialog):
         # landmarks page
         validInputLandmarks = sorted(self.data.inputLandmarks.keys())
         self.landmarkTable = LandmarkComboBoxTable(
-                                validModelLandmarks,
-                                validInputLandmarks,
-                                self._ui.tableWidgetLandmarks,
-                                )
+            validModelLandmarks,
+            validInputLandmarks,
+            self._ui.tableWidgetLandmarks,
+        )
 
         # auto reg page
         self._ui.spinBox_pcsToFit.setMaximum(self.data.T.SHAPEMODESMAX)
@@ -174,8 +177,8 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.comboBox_regmode.setCurrentIndex(
             self.data.validRegistrationModes.index(
                 self.data.registrationMode,
-                )
             )
+        )
         self._ui.spinBox_pcsToFit.setValue(self.data.nShapeModes)
         self._ui.spinBox_mWeight.setValue(self.data.mWeight)
         self._ui.checkBox_kneecorr.setChecked(bool(self.data.kneeCorr))
@@ -210,7 +213,7 @@ class LowerLimbGenerationDialog(QDialog):
                                    np.deg2rad(self._ui.doubleSpinBox_kneez.value()),
                                    ]
         else:
-            self.data.T.kneeRot = [np.deg2rad(self._ui.doubleSpinBox_kneex.value()),]
+            self.data.T.kneeRot = [np.deg2rad(self._ui.doubleSpinBox_kneex.value()), ]
 
         # auto reg page
         self.data.registrationMode = str(self._ui.comboBox_regmode.currentText())
@@ -231,7 +234,7 @@ class LowerLimbGenerationDialog(QDialog):
         self.landmarkTable.table.itemChanged.connect(self._saveConfigs)
         self._ui.pushButton_addLandmark.clicked.connect(self.landmarkTable.addLandmark)
         self._ui.pushButton_removeLandmark.clicked.connect(self.landmarkTable.removeLandmark)
-        
+
         # manual reg
         self._ui.doubleSpinBox_pc1.valueChanged.connect(self._manualRegUpdate)
         self._ui.doubleSpinBox_pc2.valueChanged.connect(self._manualRegUpdate)
@@ -267,12 +270,12 @@ class LowerLimbGenerationDialog(QDialog):
         self._ui.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self._ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self._ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        
+
         # 'none' is first elem in self._landmarkNames, so skip that
         row = 0
         for li, ln in enumerate(sorted(self.data.inputLandmarks.keys())):
             self._addObjectToTable(li, ln, self._objects.getObject(ln), checked=True)
-            row+=1
+            row += 1
 
         for mn in self.data.LL.models.keys():
             self._addObjectToTable(row, mn, self._objects.getObject(mn), checked=True)
@@ -283,7 +286,7 @@ class LowerLimbGenerationDialog(QDialog):
 
     def _addObjectToTable(self, row, name, obj, checked=True):
         typeName = obj.typeName
-        print('adding to table: %s (%s)'%(name, typeName))
+        print('adding to table: %s (%s)' % (name, typeName))
         tableItem = QTableWidgetItem(name)
         if checked:
             tableItem.setCheckState(Qt.Checked)
@@ -295,9 +298,9 @@ class LowerLimbGenerationDialog(QDialog):
     def _tableItemClicked(self):
         selectedRow = self._ui.tableWidget.currentRow()
         self.selectedObjectName = self._ui.tableWidget.item(
-                                    selectedRow,
-                                    self.objectTableHeaderColumns['Visible']
-                                    ).text()
+            selectedRow,
+            self.objectTableHeaderColumns['Visible']
+        ).text()
         print(selectedRow)
         print(self.selectedObjectName)
 
@@ -306,10 +309,10 @@ class LowerLimbGenerationDialog(QDialog):
         # name = self._getSelectedObjectName()
 
         # checked changed item is actually the checkbox
-        if tableItem.column()==self.objectTableHeaderColumns['Visible']:
+        if tableItem.column() == self.objectTableHeaderColumns['Visible']:
             # get visible status
             name = tableItem.text()
-            visible = tableItem.checkState().name=='Checked'
+            visible = tableItem.checkState().name == 'Checked'
 
             print('visibleboxchanged name', name)
             print('visibleboxchanged visible', visible)
@@ -474,7 +477,7 @@ class LowerLimbGenerationDialog(QDialog):
         for r in range(self._ui.tableWidget.rowCount()):
             tableItem = self._ui.tableWidget.item(r, self.objectTableHeaderColumns['Visible'])
             name = tableItem.text()
-            visible = tableItem.checkState().name=='Checked'
+            visible = tableItem.checkState().name == 'Checked'
             obj = self._objects.getObject(name)
             print(obj.name)
             if obj.sceneObject:
@@ -488,9 +491,9 @@ class LowerLimbGenerationDialog(QDialog):
         filename = self._ui.screenshotFilenameLineEdit.text()
         width = int(self._ui.screenshotPixelXLineEdit.text())
         height = int(self._ui.screenshotPixelYLineEdit.text())
-        self._scene.mlab.savefig( filename, size=( width, height ) )
+        self._scene.mlab.savefig(filename, size=(width, height))
 
-    #================================================================#
+    # ================================================================#
     @on_trait_change('scene.activated')
     def testPlot(self):
         # This function is called when the view is opened. We don't
@@ -501,7 +504,5 @@ class LowerLimbGenerationDialog(QDialog):
         # We can do normal mlab calls on the embedded scene.
         self._scene.mlab.test_points3d()
 
-
     # def _saveImage_fired( self ):
     #     self.scene.mlab.savefig( str(self.saveImageFilename), size=( int(self.saveImageWidth), int(self.saveImageLength) ) )
-        
