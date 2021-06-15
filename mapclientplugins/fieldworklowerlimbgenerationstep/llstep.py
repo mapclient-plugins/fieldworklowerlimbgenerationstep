@@ -156,8 +156,6 @@ class LLTransformData(object):
 
     @uniformScalingX.setter
     def uniformScalingX(self, value):
-        print
-        value
         a = 1
         self._uniformScalingX = value
         self.uniformScaling = value[0]
