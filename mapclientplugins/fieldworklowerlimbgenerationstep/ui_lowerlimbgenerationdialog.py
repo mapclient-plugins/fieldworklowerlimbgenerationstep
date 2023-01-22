@@ -12,7 +12,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
-from gias2.mappluginutils.mayaviviewer.mayaviscenewidget import MayaviSceneWidget
+from gias3.mapclientpluginutilities.viewers.mayaviscenewidget import MayaviSceneWidget
 
 
 class Ui_Dialog(object):
@@ -79,7 +79,7 @@ class Ui_Dialog(object):
         self.toolBox.setMinimumSize(QSize(0, 0))
         self.page_2 = QWidget()
         self.page_2.setObjectName(u"page_2")
-        self.page_2.setGeometry(QRect(0, 0, 334, 356))
+        self.page_2.setGeometry(QRect(0, 0, 277, 331))
         self.formLayout_3 = QFormLayout(self.page_2)
         self.formLayout_3.setObjectName(u"formLayout_3")
         self.formLayout_3.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
@@ -136,7 +136,7 @@ class Ui_Dialog(object):
         self.toolBox.addItem(self.page_2, u"Landmarks")
         self.page = QWidget()
         self.page.setObjectName(u"page")
-        self.page.setGeometry(QRect(0, 0, 381, 288))
+        self.page.setGeometry(QRect(0, 0, 321, 243))
         self.verticalLayout_5 = QVBoxLayout(self.page)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.formLayout_5 = QFormLayout()
@@ -366,7 +366,7 @@ class Ui_Dialog(object):
         self.toolBox.addItem(self.page, u"Manual Registration")
         self.page_reg = QWidget()
         self.page_reg.setObjectName(u"page_reg")
-        self.page_reg.setGeometry(QRect(0, 0, 378, 379))
+        self.page_reg.setGeometry(QRect(0, 0, 382, 408))
         self.verticalLayout_2 = QVBoxLayout(self.page_reg)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.formLayout_4 = QFormLayout()
@@ -486,7 +486,7 @@ class Ui_Dialog(object):
         self.toolBox.addItem(self.page_reg, u"Auto Registration")
         self.Screenshot = QWidget()
         self.Screenshot.setObjectName(u"Screenshot")
-        self.Screenshot.setGeometry(QRect(0, 0, 191, 143))
+        self.Screenshot.setGeometry(QRect(0, 0, 159, 119))
         self.formLayout = QFormLayout(self.Screenshot)
         self.formLayout.setObjectName(u"formLayout")
         self.pixelsXLabel = QLabel(self.Screenshot)

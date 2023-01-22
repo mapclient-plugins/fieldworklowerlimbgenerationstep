@@ -127,8 +127,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>334</width>
-              <height>356</height>
+              <width>277</width>
+              <height>331</height>
              </rect>
             </property>
             <attribute name="label">
@@ -212,8 +212,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>381</width>
-              <height>288</height>
+              <width>321</width>
+              <height>243</height>
              </rect>
             </property>
             <attribute name="label">
@@ -539,8 +539,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>378</width>
-              <height>379</height>
+              <width>382</width>
+              <height>408</height>
              </rect>
             </property>
             <attribute name="label">
@@ -705,8 +705,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>191</width>
-              <height>143</height>
+              <width>159</width>
+              <height>119</height>
              </rect>
             </property>
             <attribute name="label">
@@ -814,7 +814,7 @@
   <customwidget>
    <class>MayaviSceneWidget</class>
    <extends>QWidget</extends>
-   <header>gias2/mappluginutils/mayaviviewer/mayaviscenewidget.h</header>
+   <header>gias3/mapclientpluginutilities/viewers/mayaviscenewidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

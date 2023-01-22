@@ -9,13 +9,15 @@ scaling.
 
 Requires
 --------
-- GIAS2: https://bitbucket.org/jangle/gias2
 - MAP Client: https://github.com/MusculoskeletalAtlasProject/mapclient
+- GIAS3 - Fieldwork: https://github.com/musculoskeletal/gias3.fieldwork
+- GIAS3 - Musculoskeletal: https://github.com/musculoskeletal/gias3.musculoskeletal
+- GIAS3 - MAP Client Plugin Utilities: https://github.com/musculoskeletal/gias3.mapclientpluginutilities
 
 Inputs
 ------
 - landmarks [dict]: Dictionary of marker names : marker coordinates
-- principalcomponents [gias2.learning.PCA.PrincipalComponents instance]: The lowerlimb principalcomponents to use for the optimisation
+- principalcomponents [gias3.learning.PCA.PrincipalComponents instance]: The lowerlimb principalcomponents to use for the optimisation
 
 Outputs
 -------

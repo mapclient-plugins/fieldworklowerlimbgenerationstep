@@ -30,10 +30,8 @@ from mapclientplugins.fieldworklowerlimbgenerationstep.ui_lowerlimbgenerationdia
 from traits.api import HasTraits, Instance, on_trait_change, \
     Int, Dict
 
-from gias2.mappluginutils.mayaviviewer import MayaviViewerObjectsContainer, \
-    MayaviViewerLandmark, \
-    MayaviViewerFieldworkModel, \
-    colours
+from gias3.mapclientpluginutilities.viewers import MayaviViewerObjectsContainer, MayaviViewerFieldworkModel, MayaviViewerLandmark, colours
+
 from mapclientplugins.fieldworklowerlimbgenerationstep.landmarktablewidget import LandmarkComboBoxTable
 from mapclientplugins.fieldworklowerlimbgenerationstep.llstep import validModelLandmarks
 
@@ -109,14 +107,14 @@ class LowerLimbGenerationDialog(QDialog):
                                     MayaviViewerFieldworkModel(mn,
                                                                m.gf,
                                                                self._modelDisc,
-                                                               renderArgs=self._modelRenderArgs
+                                                               render_args=self._modelRenderArgs
                                                                )
                                     )
         # 'none' is first elem in self._landmarkNames, so skip that
         for ln, lcoords in sorted(self.data.inputLandmarks.items()):
             self._objects.addObject(ln, MayaviViewerLandmark(ln,
                                                              lcoords,
-                                                             renderArgs=self._landmarkRenderArgs
+                                                             render_args=self._landmarkRenderArgs
                                                              )
                                     )
 

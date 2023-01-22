@@ -5,11 +5,11 @@ import os
 import numpy as np
 import copy
 
-from gias2.fieldwork.field import geometric_field
-from gias2.musculoskeletal import mocap_landmark_preprocess
-from gias2.musculoskeletal.bonemodels import bonemodels
-from gias2.musculoskeletal.bonemodels import lowerlimbatlasfit
-from gias2.musculoskeletal.bonemodels import lowerlimbatlasfitscaling
+from gias3.fieldwork.field import geometric_field
+from gias3.musculoskeletal import mocap_landmark_preprocess
+from gias3.musculoskeletal.bonemodels import bonemodels
+from gias3.musculoskeletal.bonemodels import lowerlimbatlasfit
+from gias3.musculoskeletal.bonemodels import lowerlimbatlasfitscaling
 
 validModelLandmarks = (
     'femur-GT',
@@ -390,7 +390,7 @@ class LLStepData(object):
     def _createNestedPelvis(self, gf):
         """ Given a flattened pelvis model, create a hierarchical model
         """
-        newgf = geometric_field.geometric_field(
+        newgf = geometric_field.GeometricField(
             gf.name, 3,
             field_dimensions=2,
             field_basis=PELVIS_BASISTYPES

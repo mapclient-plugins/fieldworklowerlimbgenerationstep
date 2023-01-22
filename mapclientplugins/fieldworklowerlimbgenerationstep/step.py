@@ -23,7 +23,7 @@ class FieldworkLowerLimbGenerationStep(WorkflowStepMountPoint):
     ------
     landmarks : dict
         Dictionary of marker names : marker coordinates
-    principalcomponents : gias2.learning.PCA.PrincipalComponents instance
+    principalcomponents : gias3.learning.PCA.PrincipalComponents instance
         The lowerlimb principalcomponents to use for the optimisation
     fieldworkmodeldict : dict [optional, unused]
         Dictionary of model names : fieldwork models
