@@ -10,13 +10,14 @@ setup(name=u'mapclientplugins.fieldworklowerlimbgenerationstep',
       author_email='',
       url='',
       license='GPL',
-      packages=find_packages(exclude=['ez_setup',]),
+      packages=find_packages(exclude=['ez_setup', ]),
       namespace_packages=['mapclientplugins'],
       include_package_data=True,
       zip_safe=False,
       install_requires=[
           'numpy',
           'scipy',
-          'mayavi[app]'.
+          'mayavi[app]',
+          'musculoskeletal-models'
       ],
       )
